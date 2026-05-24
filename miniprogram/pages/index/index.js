@@ -6,8 +6,8 @@ Page({
   },
 
   onLoad() {
-    // 初始化并默认全部展开
-    const cats = categories.map(cat => ({ ...cat, expanded: true }));
+    // 初始化并默认全部折叠
+    const cats = categories.map(cat => ({ ...cat, expanded: false }));
     this.setData({ categories: cats });
   },
 

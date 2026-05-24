@@ -70,6 +70,12 @@ page {
   transform: scale(0.97);
 }
 
+.lock-sub {
+  font-size: 22rpx;
+  color: #BDC3C7;
+  margin-bottom: 12rpx;
+}
+
 .lock-close {
   padding: 16rpx 0;
   color: #95A5A6;

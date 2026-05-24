@@ -5,7 +5,12 @@ const { Visualizer } = require('../../utils/visualizer');
 Page({
   data: {
     algorithm: {},
-    showLock: false,          // 是否显示解锁遮罩
+    showLock: false,
+    lockTitle: '',
+    lockDesc: '',
+    lockBtnText: '观看广告解锁',
+    lockExtra: '',
+    freeRemaining: 3,
     currentStep: 0,
     totalSteps: 0,
     progressPercent: 0,
@@ -36,14 +41,22 @@ Page({
     this.setData({ algorithm });
     this.algoId = id;
 
-    // 进阶算法：检查是否已解锁
+    // 进阶算法：每日免费 3 次，超出看广告
     if (algorithm.difficulty === '进阶') {
-      const unlocked = wx.getStorageSync('unlocked_algorithms') || {};
-      if (!unlocked[id]) {
-        this.setData({ showLock: true });
+      const status = this.checkDailyQuota();
+      if (!status.allowed) {
+        this.setData({
+          showLock: true,
+          lockTitle: '今日次数已用完',
+          lockDesc: '每日免费学 3 个进阶算法\n观看小广告可继续学习 🎁',
+          lockBtnText: '看广告继续学习',
+          lockExtra: '明天 0 点自动重置免费次数',
+          freeRemaining: 0
+        });
         this.createRewardedVideoAd();
-        return; // 不初始化 canvas，等解锁后再初始化
+        return;
       }
+      this.setData({ freeRemaining: Math.max(0, 3 - status.quota.free) });
     }
   },
 
@@ -60,7 +73,27 @@ Page({
     }
   },
 
-  // ==================== 解锁逻辑 ====================
+  // ==================== 每日配额 + 解锁逻辑 ====================
+
+  checkDailyQuota() {
+    const today = new Date().toDateString();
+    const quota = wx.getStorageSync('algo_daily_quota') || { date: '', free: 0, ad: 0 };
+
+    // 新的一天，重置
+    if (quota.date !== today) {
+      quota.date = today;
+      quota.free = 0;
+      quota.ad = 0;
+    }
+
+    if (quota.free < 3) {
+      quota.free++;
+      wx.setStorageSync('algo_daily_quota', quota);
+      return { allowed: true, quota };
+    }
+
+    return { allowed: false, quota };
+  },
 
   createRewardedVideoAd() {
     // 测试广告位 ID：调试时可正常展示测试广告，上线后替换为真实 ID
@@ -135,13 +168,15 @@ Page({
   },
 
   doUnlock() {
-    // 记录解锁状态到本地存储
-    const unlocked = wx.getStorageSync('unlocked_algorithms') || {};
-    unlocked[this.algoId] = true;
-    wx.setStorageSync('unlocked_algorithms', unlocked);
+    // 广告观看完毕，增加 1 次额外学习机会
+    const today = new Date().toDateString();
+    const quota = wx.getStorageSync('algo_daily_quota') || { date: today, free: 0, ad: 0 };
+    quota.ad++;
+    quota.free++; // 用广告换 1 次
+    wx.setStorageSync('algo_daily_quota', quota);
 
     this.setData({ showLock: false });
-    wx.showToast({ title: '已解锁！', icon: 'success', duration: 1200 });
+    wx.showToast({ title: '解锁成功！', icon: 'success', duration: 1200 });
 
     // 初始化 canvas 并运行算法
     this.initCanvas();

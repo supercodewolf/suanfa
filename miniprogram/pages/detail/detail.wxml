@@ -88,6 +88,9 @@
     </view>
   </view>
 
+  <!-- 广告位（开通流量主后自动展示） -->
+  <ad unit-id="adunit-banner-detail" ad-type="banner" bindload="onAdLoad" binderror="onAdError"></ad>
+
   <!-- 底部间距 -->
   <view style="height: 40rpx;"></view>
 </view>

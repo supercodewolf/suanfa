@@ -742,9 +742,10 @@ function jumpSearch(arr, target) {
   const snapshots = [];
   const sorted = [...arr].sort((a, b) => a - b);
   const n = sorted.length;
-  const step = Math.floor(Math.sqrt(n));
+  const jumpSize = Math.floor(Math.sqrt(n));
+  let step = jumpSize;
 
-  snapshots.push(snapshot(sorted, [], [], [], `开始跳跃搜索目标值 ${target}，步长 = ${step}`));
+  snapshots.push(snapshot(sorted, [], [], [], `开始跳跃搜索目标值 ${target}，步长 = ${jumpSize}`));
 
   let prev = 0;
   while (sorted[Math.min(step, n) - 1] < target) {
@@ -754,7 +755,7 @@ function jumpSearch(arr, target) {
       { left: prev, right: Math.min(step, n) - 1, mid: Math.min(step, n) - 1 }
     ));
     prev = step;
-    step += Math.floor(Math.sqrt(n));
+    step += jumpSize;
     if (prev >= n) {
       snapshots.push(snapshot(sorted, [], [], [], `未找到目标值 ${target}`));
       return { snapshots, result: -1 };

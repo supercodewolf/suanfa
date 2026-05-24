@@ -1402,7 +1402,7 @@ function knapsack01(config) {
           rows: buildTableRows(dp, i, n + 1),
           highlight: { row: i, col: j + 1, fromA, fromB: null },
           items: itemsArray, currentItem: i,
-          description: `物品${i}(重${w}kg,值${v}元) 太重了！容量${j}kg 装不下 → 只能不选，拷贝上一行同列 ${dp[i][j]}元`
+          description: `物品${i}(${w}kg/${v}元) 太重装不下 → 继承上方 ${dp[i][j]}元`
         });
       } else {
         const skip = dp[i - 1][j];
@@ -1417,7 +1417,7 @@ function knapsack01(config) {
           rows: buildTableRows(dp, i, n + 1),
           highlight: { row: i, col: j + 1, fromA, fromB },
           items: itemsArray, currentItem: i,
-          description: `物品${i}(重${w}kg,值${v}元)：不选得 ${skip}元，放入得 ${v}+${dp[i-1][j-w]}=${take}元 → ${chosen}，取 ${dp[i][j]}元`
+          description: `物品${i}(${w}kg/${v}元)：不选${skip}元 vs 放入${v}+${dp[i-1][j-w]}=${take}元 → ${chosen}，取${dp[i][j]}元`
         });
       }
     }

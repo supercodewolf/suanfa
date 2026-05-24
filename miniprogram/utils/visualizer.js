@@ -631,10 +631,30 @@ class Visualizer {
     if (!text) return;
     const ctx = this.ctx;
     ctx.fillStyle = '#2C3E50';
-    ctx.font = '14px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
-    ctx.fillText(text, this.width / 2, this.height - 12);
+
+    // 自动换行：根据 canvas 宽度拆分多行
+    const maxWidth = this.width - 40;
+    ctx.font = '13px sans-serif';
+    const lines = [];
+    let line = '';
+    for (const ch of text) {
+      const test = line + ch;
+      if (ctx.measureText(test).width > maxWidth && line.length > 0) {
+        lines.push(line);
+        line = ch;
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+
+    const lineHeight = 18;
+    const startY = this.height - 10 - (lines.length - 1) * lineHeight;
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], this.width / 2, startY + i * lineHeight);
+    }
   }
 
   /**

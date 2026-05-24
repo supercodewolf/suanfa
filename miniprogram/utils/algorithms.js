@@ -1108,6 +1108,380 @@ function buildGridSnapshot(grid, visited, current, path, newCells, description) 
   };
 }
 
+// ==================== 扩展排序算法 ====================
+
+/**
+ * 基数排序 (LSD)
+ */
+function radixSort(arr) {
+  const snapshots = [];
+  const array = [...arr];
+  const n = array.length;
+
+  snapshots.push(snapshot(array, [], [], [], '初始数组'));
+
+  const maxVal = Math.max(...array);
+  const maxDigits = String(maxVal).length;
+
+  for (let digit = 0; digit < maxDigits; digit++) {
+    const divisor = Math.pow(10, digit);
+    snapshots.push(snapshot(
+      [...array], [], [], [],
+      `按第 ${digit + 1} 位（除数=${divisor}）进行计数排序`
+    ));
+
+    // 计数当前位
+    const count = new Array(10).fill(0);
+    for (let i = 0; i < n; i++) {
+      const d = Math.floor(array[i] / divisor) % 10;
+      count[d]++;
+    }
+    for (let i = 1; i < 10; i++) count[i] += count[i - 1];
+
+    // 放置元素
+    const output = new Array(n);
+    for (let i = n - 1; i >= 0; i--) {
+      const d = Math.floor(array[i] / divisor) % 10;
+      const idx = count[d] - 1;
+      output[idx] = array[i];
+      count[d]--;
+    }
+
+    // 复制回原数组
+    for (let i = 0; i < n; i++) {
+      array[i] = output[i];
+    }
+
+    snapshots.push(snapshot(
+      [...array], [], [], [],
+      `第 ${digit + 1} 位排序完成`
+    ));
+  }
+
+  snapshots.push(snapshot([...array], [], [], allIndices(n), '排序完成！'));
+  return { snapshots, result: array };
+}
+
+/**
+ * 梳排序
+ */
+function combSort(arr) {
+  const snapshots = [];
+  const array = [...arr];
+  const n = array.length;
+
+  snapshots.push(snapshot(array, [], [], [], '初始数组'));
+
+  let gap = n;
+  const shrink = 1.3;
+  let sorted = false;
+
+  while (!sorted) {
+    gap = Math.floor(gap / shrink);
+    if (gap <= 1) {
+      gap = 1;
+      sorted = true;
+    }
+
+    snapshots.push(snapshot(
+      [...array], [], [], [],
+      `gap = ${gap}，比较相隔 ${gap} 个位置的元素`
+    ));
+
+    for (let i = 0; i + gap < n; i++) {
+      snapshots.push(snapshot(
+        [...array], [i, i + gap], [], [],
+        `比较 ${array[i]} 和 ${array[i + gap]}`
+      ));
+      if (array[i] > array[i + gap]) {
+        [array[i], array[i + gap]] = [array[i + gap], array[i]];
+        sorted = false;
+        snapshots.push(snapshot(
+          [...array], [], [i, i + gap], [],
+          `交换 ${array[i + gap]} 和 ${array[i]}`
+        ));
+      }
+    }
+  }
+
+  snapshots.push(snapshot([...array], [], [], allIndices(n), '排序完成！'));
+  return { snapshots, result: array };
+}
+
+/**
+ * 桶排序
+ */
+function bucketSort(arr) {
+  const snapshots = [];
+  const array = [...arr];
+  const n = array.length;
+  const min = Math.min(...array);
+  const max = Math.max(...array);
+  const bucketCount = Math.min(n, 6);
+  const bucketRange = (max - min) / bucketCount;
+
+  snapshots.push(snapshot(array, [], [], [], `创建 ${bucketCount} 个桶 (范围: ${min}~${max})`));
+
+  // 分配到桶
+  const buckets = Array.from({ length: bucketCount }, () => []);
+  for (let i = 0; i < n; i++) {
+    let idx = Math.floor((array[i] - min) / bucketRange);
+    if (idx >= bucketCount) idx = bucketCount - 1;
+    buckets[idx].push(array[i]);
+    snapshots.push(snapshot(
+      [...array], [i], [], [],
+      `将 ${array[i]} 放入桶 ${idx + 1}`
+    ));
+  }
+
+  // 桶内排序
+  for (let b = 0; b < bucketCount; b++) {
+    buckets[b].sort((a, b) => a - b);
+    snapshots.push(snapshot(
+      [...array], [], [], [],
+      `桶 ${b + 1} (${buckets[b].join(', ')}) 排序完成`
+    ));
+  }
+
+  // 合并
+  const result = [];
+  for (let b = 0; b < bucketCount; b++) {
+    for (const v of buckets[b]) result.push(v);
+  }
+  snapshots.push(snapshot(
+    [...result], [], [], allIndices(n),
+    `合并所有桶，排序完成！`
+  ));
+
+  return { snapshots, result };
+}
+
+// ==================== 扩展搜索算法 ====================
+
+/**
+ * 斐波那契搜索
+ */
+function fibonacciSearch(arr, target) {
+  const snapshots = [];
+  const sorted = [...arr].sort((a, b) => a - b);
+  const n = sorted.length;
+
+  snapshots.push(snapshot(sorted, [], [], [], `开始斐波那契搜索目标值 ${target}`));
+
+  // 构建斐波那契数列
+  let fib2 = 0;   // F(k-2)
+  let fib1 = 1;   // F(k-1)
+  let fib = fib1 + fib2; // F(k)
+
+  while (fib < n) {
+    fib2 = fib1;
+    fib1 = fib;
+    fib = fib1 + fib2;
+  }
+
+  let offset = -1;
+
+  while (fib > 1) {
+    const i = Math.min(offset + fib2, n - 1);
+
+    snapshots.push(snapshot(
+      [...sorted], [i], [], [],
+      `比较位置 ${i}(${sorted[i]}) 和 ${target}`,
+      { left: offset + 1, right: Math.min(offset + fib, n - 1), mid: i }
+    ));
+
+    if (sorted[i] < target) {
+      fib = fib1;
+      fib1 = fib2;
+      fib2 = fib - fib1;
+      offset = i;
+      snapshots.push(snapshot(
+        [...sorted], [], [], [],
+        `${sorted[i]} < ${target}，向右搜索 [${offset + 1}..]`,
+        { left: offset + 1, right: Math.min(offset + fib, n - 1), mid: -1 }
+      ));
+    } else if (sorted[i] > target) {
+      fib = fib2;
+      fib1 = fib1 - fib2;
+      fib2 = fib - fib1;
+      snapshots.push(snapshot(
+        [...sorted], [], [], [],
+        `${sorted[i]} > ${target}，向左搜索 [..${i - 1}]`,
+        { left: offset + 1, right: i - 1, mid: -1 }
+      ));
+    } else {
+      snapshots.push(snapshot([...sorted], [], [i], [], `找到！目标值 ${target} 在位置 ${i}`));
+      return { snapshots, result: i };
+    }
+  }
+
+  if (fib1 && sorted[offset + 1] === target) {
+    const i = offset + 1;
+    snapshots.push(snapshot([...sorted], [], [i], [], `找到！目标值 ${target} 在位置 ${i}`));
+    return { snapshots, result: i };
+  }
+
+  snapshots.push(snapshot(sorted, [], [], [], `未找到目标值 ${target}`));
+  return { snapshots, result: -1 };
+}
+
+// ==================== DP / 数学算法 ====================
+
+/**
+ * 斐波那契 DP
+ */
+function fibonacciDP(N) {
+  const snapshots = [];
+  N = N || 10;
+  const dp = new Array(N + 1).fill(0);
+  dp[0] = 0;
+  if (N >= 1) dp[1] = 1;
+
+  snapshots.push(snapshot(
+    [...dp].map((v, i) => i <= 1 ? v : 0), [], [0, 1], [],
+    `F(0)=0, F(1)=1，开始计算 F(2)~F(${N})`
+  ));
+
+  for (let i = 2; i <= N; i++) {
+    snapshots.push(snapshot(
+      [...dp], [i - 2, i - 1], [], Array.from({ length: i }, (_, j) => j),
+      `F(${i}) = F(${i - 1}) + F(${i - 2}) = ${dp[i - 1]} + ${dp[i - 2]}`
+    ));
+    dp[i] = dp[i - 1] + dp[i - 2];
+    snapshots.push(snapshot(
+      [...dp], [], [i], Array.from({ length: i + 1 }, (_, j) => j),
+      `F(${i}) = ${dp[i]}`
+    ));
+  }
+
+  snapshots.push(snapshot(
+    dp, [], [], allIndices(N + 1),
+    `计算完成！F(${N}) = ${dp[N]}`
+  ));
+
+  return { snapshots, result: dp[N] };
+}
+
+/**
+ * 0/1 背包问题
+ */
+function knapsack01(config) {
+  const snapshots = [];
+  config = config || {};
+  const weights = config.weights || [2, 3, 4, 5];
+  const values = config.values || [3, 4, 5, 8];
+  const capacity = config.capacity || 8;
+  const n = weights.length;
+
+  const dp = Array.from({ length: n + 1 }, () => new Array(capacity + 1).fill(0));
+
+  snapshots.push({
+    type: 'table',
+    headers: ['物品\\容量', ...Array.from({ length: capacity + 1 }, (_, i) => String(i))],
+    rows: buildTableRows(dp, 0, n + 1),
+    highlight: { row: 0, col: 0 },
+    description: `0/1背包：${n}个物品，容量=${capacity}`
+  });
+
+  for (let i = 1; i <= n; i++) {
+    const w = weights[i - 1];
+    const v = values[i - 1];
+
+    for (let j = 0; j <= capacity; j++) {
+      if (w > j) {
+        dp[i][j] = dp[i - 1][j];
+        snapshots.push({
+          type: 'table',
+          headers: ['物品\\容量', ...Array.from({ length: capacity + 1 }, (_, k) => String(k))],
+          rows: buildTableRows(dp, i, n + 1),
+          highlight: { row: i, col: j },
+          description: `物品${i}(重${w},值${v}) 放不进容量${j}，继承 dp[${i - 1}][${j}]=${dp[i - 1][j]}`
+        });
+      } else {
+        const skip = dp[i - 1][j];
+        const take = dp[i - 1][j - w] + v;
+        dp[i][j] = Math.max(skip, take);
+        snapshots.push({
+          type: 'table',
+          headers: ['物品\\容量', ...Array.from({ length: capacity + 1 }, (_, k) => String(k))],
+          rows: buildTableRows(dp, i, n + 1),
+          highlight: { row: i, col: j },
+          description: `物品${i}(${w}/${v})：不选=${skip}，选=${take} → ${dp[i][j]}`
+        });
+      }
+    }
+  }
+
+  snapshots.push({
+    type: 'table',
+    headers: ['物品\\容量', ...Array.from({ length: capacity + 1 }, (_, k) => String(k))],
+    rows: buildTableRows(dp, n, n + 1),
+    highlight: { row: n, col: capacity },
+    description: `最大价值 = ${dp[n][capacity]}`
+  });
+
+  return { snapshots, result: dp[n][capacity] };
+}
+
+function buildTableRows(dp, maxRow, totalRows) {
+  const rows = [];
+  for (let i = 0; i < totalRows; i++) {
+    if (i <= maxRow) {
+      rows.push([`物品${i}`.replace('物品0', '初始'), ...dp[i].map(String)]);
+    } else {
+      rows.push([]); // 隐藏未计算行
+    }
+  }
+  return rows;
+}
+
+/**
+ * 快速幂
+ */
+function fastPower(a, n) {
+  const snapshots = [];
+  a = a || 2;
+  n = n || 13;
+
+  let base = a;
+  let exp = n;
+  let result = 1;
+
+  snapshots.push({
+    type: 'fastpower',
+    base, exp, result,
+    description: `计算 ${a}^${n}，初始化 result=1`
+  });
+
+  while (exp > 0) {
+    if (exp % 2 === 1) {
+      const oldResult = result;
+      result = result * base;
+      snapshots.push({
+        type: 'fastpower',
+        base, exp, result,
+        description: `指数 ${exp} 为奇数，result = ${oldResult} × ${base} = ${result}`
+      });
+    }
+    exp = Math.floor(exp / 2);
+    const oldBase = base;
+    base = base * base;
+    snapshots.push({
+      type: 'fastpower',
+      base, exp, result,
+      description: `底数平方 ${oldBase}² = ${base}，指数折半 → ${exp}`
+    });
+  }
+
+  snapshots.push({
+    type: 'fastpower',
+    base, exp, result,
+    description: `结果：${a}^${n} = ${result}`
+  });
+
+  return { snapshots, result };
+}
+
 // ==================== 工具函数 ====================
 
 function snapshot(array, comparing, swapping, sorted, description, _searchMeta) {
@@ -1157,6 +1531,9 @@ function executeAlgorithm(algoId, arr, extra) {
     case 'shell':          return shellSort(arr);
     case 'cocktail':       return cocktailSort(arr);
     case 'counting':       return countingSort(arr);
+    case 'radix':          return radixSort(arr);
+    case 'comb':           return combSort(arr);
+    case 'bucket':         return bucketSort(arr);
     case 'quick':          return quickSort(arr);
     case 'merge':          return mergeSort(arr);
     case 'heap':           return heapSort(arr);
@@ -1164,8 +1541,12 @@ function executeAlgorithm(algoId, arr, extra) {
     case 'binary':         return binarySearch(arr, extra);
     case 'jump':           return jumpSearch(arr, extra);
     case 'interpolation':  return interpolationSearch(arr, extra);
+    case 'fibonacciSearch': return fibonacciSearch(arr, extra);
+    case 'fibdp':          return fibonacciDP(extra || 10);
+    case 'knapsack':       return knapsack01(null);
     case 'sieve':          return sieveOfEratosthenes(extra || 30);
     case 'gcd':            return euclideanGCD(arr || 48, extra || 18);
+    case 'fastpower':      return fastPower(arr || 2, extra || 13);
     case 'bfs':            return bfsMaze();
     case 'dfs':            return dfsMaze();
     case 'stack':          return stackDemo();
@@ -1177,10 +1558,12 @@ function executeAlgorithm(algoId, arr, extra) {
 module.exports = {
   bubbleSort, selectionSort, insertionSort,
   shellSort, cocktailSort, countingSort,
+  radixSort, combSort, bucketSort,
   quickSort, mergeSort, heapSort,
   linearSearch, binarySearch,
-  jumpSearch, interpolationSearch,
-  sieveOfEratosthenes, euclideanGCD,
+  jumpSearch, interpolationSearch, fibonacciSearch,
+  fibonacciDP, knapsack01,
+  sieveOfEratosthenes, euclideanGCD, fastPower,
   bfsMaze, dfsMaze,
   stackDemo, queueDemo,
   generateRandomArray,

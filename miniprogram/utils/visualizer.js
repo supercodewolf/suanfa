@@ -53,6 +53,10 @@ class Visualizer {
       this.drawGridSnapshot(snapshot);
     } else if (snapshot.type === 'gcd') {
       this.drawGcdSnapshot(snapshot);
+    } else if (snapshot.type === 'table') {
+      this.drawTableSnapshot(snapshot);
+    } else if (snapshot.type === 'fastpower') {
+      this.drawFastPowerSnapshot(snapshot);
     }
 
     // 底部描述文字
@@ -410,6 +414,102 @@ class Visualizer {
     ctx.textBaseline = 'bottom';
     ctx.fillText('a', startX + boxW - 10, centerY - boxH / 2 - 2);
     ctx.fillText('b', startX + boxW + gap + 10, centerY - boxH / 2 - 2);
+  }
+
+  /**
+   * 绘制 DP 表格快照（背包问题）
+   */
+  drawTableSnapshot(snapshot) {
+    const { headers, rows, highlight } = snapshot;
+    const ctx = this.ctx;
+    const w = this.width;
+    const h = this.height;
+
+    const padding = { top: 20, right: 20, bottom: 70, left: 20 };
+    const cols = headers.length;
+    const visibleRows = rows.filter(r => r.length > 0);
+    const visibleRowCount = Math.max(visibleRows.length, 1);
+    const cellW = Math.min(48, (w - padding.left - padding.right) / cols);
+    const cellH = 24;
+    const totalW = cellW * cols;
+    const offsetX = padding.left + (w - padding.left - padding.right - totalW) / 2;
+    const offsetY = padding.top + 10;
+
+    // 表头
+    for (let c = 0; c < cols; c++) {
+      const x = offsetX + c * cellW;
+      ctx.fillStyle = '#2C3E50';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(headers[c], x + cellW / 2, offsetY + cellH / 2);
+    }
+
+    // 数据行
+    for (let r = 0; r < visibleRows.length; r++) {
+      const row = visibleRows[r];
+      for (let c = 0; c < cols; c++) {
+        const x = offsetX + c * cellW;
+        const y = offsetY + cellH + r * cellH;
+        const isHighlight = highlight && highlight.row === r && highlight.col === c;
+
+        ctx.fillStyle = isHighlight ? '#E74C3C' : (r % 2 === 0 ? '#FFFFFF' : '#F0F2F5');
+        ctx.fillRect(x, y, cellW, cellH);
+        ctx.strokeStyle = '#E0E0E0';
+        ctx.strokeRect(x, y, cellW, cellH);
+
+        ctx.fillStyle = isHighlight ? '#FFFFFF' : '#2C3E50';
+        ctx.font = `${isHighlight ? 'bold ' : ''}10px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(row[c] || '', x + cellW / 2, y + cellH / 2);
+      }
+    }
+  }
+
+  /**
+   * 绘制快速幂快照
+   */
+  drawFastPowerSnapshot(snapshot) {
+    const { base, exp, result } = snapshot;
+    const ctx = this.ctx;
+    const w = this.width;
+    const h = this.height;
+
+    const centerY = (h - 70) / 2;
+    const boxW = 100, boxH = 50, gap = 30;
+    const totalW = boxW * 3 + gap * 2;
+    const startX = w / 2 - totalW / 2;
+
+    const labels = ['底数 base', '指数 exp', '结果 result'];
+    const values = [String(base), String(exp), String(result)];
+    const colors = ['#4A90D9', '#E67E22', '#27AE60'];
+
+    for (let i = 0; i < 3; i++) {
+      const x = startX + i * (boxW + gap);
+
+      // 标签
+      ctx.fillStyle = '#95A5A6';
+      ctx.font = '11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(labels[i], x + boxW / 2, centerY - boxH / 2 - 8);
+
+      // 框
+      this.roundRect(x, centerY - boxH / 2, boxW, boxH, 10);
+      ctx.fillStyle = colors[i];
+      ctx.fill();
+      ctx.strokeStyle = colors[i];
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 值
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 24px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(values[i], x + boxW / 2, centerY);
+    }
   }
 
   /**

@@ -89,6 +89,58 @@ const algorithms = {
       stable: false,
       description: '利用堆这种数据结构来排序。首先将数组构建成一个最大堆（父节点总是大于子节点），然后反复取出堆顶元素（最大值）放到数组末尾，并调整剩余元素维持堆的性质。',
       steps: ['将数组构建成最大堆', '取出堆顶元素（最大值），放到数组末尾', '调整剩余元素，重新维持最大堆性质', '重复直到堆为空']
+    },
+    {
+      id: 'radix',
+      name: '基数排序',
+      difficulty: '进阶',
+      timeComplexity: 'O(d×(n+k))',
+      spaceComplexity: 'O(n + k)',
+      stable: true,
+      description: '一种非比较排序算法。从最低位（LSD）开始，依次按每一位数字进行稳定的计数排序，直到最高位。不直接比较元素大小，而是利用数字的位来排序。适合整数排序。',
+      steps: ['找到最大数，确定位数', '从最低位开始逐位处理', '对当前位进行计数排序', '所有位处理完毕后数组有序']
+    },
+    {
+      id: 'comb',
+      name: '梳排序',
+      difficulty: '进阶',
+      timeComplexity: 'O(n²) 最坏',
+      spaceComplexity: 'O(1)',
+      stable: false,
+      description: '冒泡排序的改进版，通过设置较大的间隔来比较和交换元素，消除"乌龟"（数组末尾的小值）。间隔以1.3的比例逐渐缩小（称为收缩因子），最后一轮间隔为1时等同于冒泡排序。比冒泡排序效率高很多。',
+      steps: ['设置初始 gap = n / 1.3', '比较相距 gap 的两个元素，逆序则交换', '缩小 gap = gap / 1.3', '重复直到 gap = 1 且没有交换']
+    },
+    {
+      id: 'bucket',
+      name: '桶排序',
+      difficulty: '进阶',
+      timeComplexity: 'O(n + k) 平均',
+      spaceComplexity: 'O(n + k)',
+      stable: true,
+      description: '将数组元素分配到多个"桶"中，每个桶内的元素再分别排序（通常用插入排序），最后按顺序将各个桶的元素合并。当数据均匀分布时效率极高。',
+      steps: ['创建若干个桶', '将每个元素放入对应的桶中', '每个桶内进行排序', '按顺序合并所有桶的元素']
+    }
+  ],
+  dp: [
+    {
+      id: 'fibdp',
+      name: '斐波那契 DP',
+      difficulty: '入门',
+      timeComplexity: 'O(n)',
+      spaceComplexity: 'O(n)',
+      stable: null,
+      description: '动态规划的经典入门案例。通过自底向上（或带记忆的递归）计算斐波那契数列，避免重复计算。从 F(0)=0, F(1)=1 开始，每个后续值等于前两个值之和。',
+      steps: ['初始化 F(0)=0, F(1)=1', '从2开始逐个计算 F(n) = F(n-1) + F(n-2)', '保存每个中间结果避免重复计算', '返回 F(n)']
+    },
+    {
+      id: 'knapsack',
+      name: '0/1 背包问题',
+      difficulty: '进阶',
+      timeComplexity: 'O(n×W)',
+      spaceComplexity: 'O(n×W)',
+      stable: null,
+      description: '给定一组物品，每个物品有重量和价值，在背包容量限制下选择物品装入背包，使得总价值最大。每个物品只能选或不选（0/1）。用二维DP表格记录每个状态的最优解。',
+      steps: ['创建 DP 表格：行=物品，列=容量', '逐个物品考虑：选或不选', '若不选：继承上一行值', '若选：比较 选与不选 的最大值']
     }
   ],
   searching: [
@@ -131,6 +183,16 @@ const algorithms = {
       stable: null,
       description: '二分搜索的改进版。不是总是取中间位置，而是根据目标值的大小，用插值公式估算目标值可能的位置。当数据均匀分布时，比二分搜索更快。类似于在字典中查单词，你会根据首字母翻到大致位置。',
       steps: ['用插值公式估算目标位置', '比较估算位置的元素与目标值', '根据比较结果缩小搜索范围', '重复直到找到或范围为空']
+    },
+    {
+      id: 'fibonacciSearch',
+      name: '斐波那契搜索',
+      difficulty: '进阶',
+      timeComplexity: 'O(log n)',
+      spaceComplexity: 'O(1)',
+      stable: null,
+      description: '利用斐波那契数列进行分割的搜索算法。不像二分搜索那样取中间位置，而是用斐波那契数作为分割点。每次比较后缩小范围，比二分搜索需要的比较次数更少（只需加减法），适合在磁带等顺序访问介质上使用。',
+      steps: ['找到最小斐波那契数 ≥ n', '用斐波那契数确定分割点', '比较分割点元素与目标值', '根据结果缩小范围，用下一个斐波那契数继续']
     }
   ],
   structures: [
@@ -175,6 +237,16 @@ const algorithms = {
       stable: null,
       description: '计算两个数的最大公约数（GCD）。核心原理：两个数的最大公约数等于其中较小的数和两数相除余数的最大公约数。反复用较小数去除较大数取余，直到余数为0。',
       steps: ['用较大数除以较小数，取余数', '如果余数为0，较小数即为GCD', '否则用较小数和余数重复上述过程', '直到余数为0，最后的除数即为GCD']
+    },
+    {
+      id: 'fastpower',
+      name: '快速幂',
+      difficulty: '入门',
+      timeComplexity: 'O(log n)',
+      spaceComplexity: 'O(1)',
+      stable: null,
+      description: '高效计算 a^n 的算法（通常取模）。利用二进制拆分：当指数为偶数时 a^n = (a²)^(n/2)，当指数为奇数时 a^n = a × (a²)^((n-1)/2)。将 O(n) 次乘法降为 O(log n) 次。',
+      steps: ['初始化结果 result = 1', '当指数 > 0 时循环', '若指数为奇数，result *= 底数', '底数自乘，指数减半，重复直到指数为0']
     }
   ],
   graph: [
@@ -229,6 +301,13 @@ const categories = [
     icon: '🏗️',
     color: '#E67E22',
     algorithms: algorithms.structures
+  },
+  {
+    id: 'dp',
+    name: '动态规划',
+    icon: '🧮',
+    color: '#3498DB',
+    algorithms: algorithms.dp
   },
   {
     id: 'math',

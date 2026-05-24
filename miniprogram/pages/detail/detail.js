@@ -78,17 +78,17 @@ Page({
   // ==================== 算法执行 ====================
 
   runAlgorithm(algoId) {
-    const searchAlgos = ['linear', 'binary', 'jump', 'interpolation'];
-    const sortAlgos = ['bubble', 'selection', 'insertion', 'shell', 'cocktail', 'quick', 'merge', 'heap', 'counting'];
+    const searchAlgos = ['linear', 'binary', 'jump', 'interpolation', 'fibonacciSearch'];
+    const sortAlgos = ['bubble', 'selection', 'insertion', 'shell', 'cocktail', 'quick', 'merge', 'heap', 'counting', 'radix', 'comb', 'bucket'];
     const structAlgos = ['stack', 'queue'];
-    const mathAlgos = ['sieve', 'gcd'];
+    const mathAlgos = ['sieve', 'gcd', 'fastpower'];
     const graphAlgos = ['bfs', 'dfs'];
+    const dpAlgos = ['fibdp', 'knapsack'];
 
     let arr, extra;
 
     if (searchAlgos.includes(algoId)) {
-      // 搜索算法需要有序数组
-      if (['binary', 'jump', 'interpolation'].includes(algoId)) {
+      if (['binary', 'jump', 'interpolation', 'fibonacciSearch'].includes(algoId)) {
         arr = Array.from({ length: 15 }, () => Math.floor(Math.random() * 50) + 1).sort((a, b) => a - b);
       } else {
         arr = Array.from({ length: 15 }, () => Math.floor(Math.random() * 50) + 1);
@@ -99,12 +99,16 @@ Page({
       arr = generateRandomArray(12, 2, 40);
     } else if (structAlgos.includes(algoId)) {
       arr = [];
+    } else if (dpAlgos.includes(algoId)) {
+      arr = [];
+      if (algoId === 'fibdp') extra = 10;
     } else if (mathAlgos.includes(algoId)) {
       if (algoId === 'sieve') {
         extra = 30;
+      } else if (algoId === 'fastpower') {
+        arr = 2; extra = 13;
       } else {
-        arr = 48;
-        extra = 18;
+        arr = 48; extra = 18;
       }
     } else if (graphAlgos.includes(algoId)) {
       arr = [];

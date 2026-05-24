@@ -350,11 +350,14 @@ Page({
   // ==================== 广告回调 ====================
 
   onAdLoad() {
-    // Banner 广告加载成功
+    console.log('✅ Banner广告加载成功');
   },
 
   onAdError(err) {
-    // Banner 广告加载失败（未开通流量主时静默忽略）
-    console.log('Banner广告未加载:', err.detail.errMsg);
+    const msg = err.detail.errMsg || '未知错误';
+    console.warn('❌ Banner广告加载失败:', msg);
+    // 常见原因：
+    // 1. 真机预览不支持测试广告 → 需要上传"体验版"测试
+    // 2. 正式版需用真实广告位 ID 替换测试 ID
   }
 });

@@ -106,7 +106,9 @@
   </view>
 
   <!-- 广告位（调试用测试ID，上线后替换为真实ID） -->
-  <ad unit-id="adunit-7fca7715e8e1c92f" ad-type="banner" bindload="onAdLoad" binderror="onAdError"></ad>
+  <view class="ad-wrap">
+    <ad unit-id="adunit-7fca7715e8e1c92f" bindload="onAdLoad" binderror="onAdError" style="width:100%;display:block;"></ad>
+  </view>
 
   <!-- 底部间距 -->
   <view style="height: 40rpx;"></view>

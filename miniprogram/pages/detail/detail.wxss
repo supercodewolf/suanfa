@@ -76,6 +76,14 @@ page {
   font-size: 26rpx;
 }
 
+/* 广告位 */
+.ad-wrap {
+  margin: 24rpx 0;
+  border-radius: 16rpx;
+  overflow: hidden;
+  min-height: 20rpx;
+}
+
 /* 已解锁标记 */
 .unlocked-badge {
   font-size: 20rpx;

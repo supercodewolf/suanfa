@@ -78,27 +78,40 @@ Page({
   // ==================== 算法执行 ====================
 
   runAlgorithm(algoId) {
-    const isSearch = algoId === 'linear' || algoId === 'binary';
-    const isStructure = algoId === 'stack' || algoId === 'queue';
+    const searchAlgos = ['linear', 'binary', 'jump', 'interpolation'];
+    const sortAlgos = ['bubble', 'selection', 'insertion', 'shell', 'cocktail', 'quick', 'merge', 'heap', 'counting'];
+    const structAlgos = ['stack', 'queue'];
+    const mathAlgos = ['sieve', 'gcd'];
+    const graphAlgos = ['bfs', 'dfs'];
 
-    let arr, target;
+    let arr, extra;
 
-    if (isSearch) {
-      if (algoId === 'binary') {
+    if (searchAlgos.includes(algoId)) {
+      // 搜索算法需要有序数组
+      if (['binary', 'jump', 'interpolation'].includes(algoId)) {
         arr = Array.from({ length: 15 }, () => Math.floor(Math.random() * 50) + 1).sort((a, b) => a - b);
       } else {
         arr = Array.from({ length: 15 }, () => Math.floor(Math.random() * 50) + 1);
       }
-      target = arr[Math.floor(Math.random() * arr.length)];
-      wx.showToast({ title: '搜索目标: ' + target, icon: 'none', duration: 1500 });
-    } else if (isStructure) {
-      arr = [];
-    } else {
+      extra = arr[Math.floor(Math.random() * arr.length)];
+      wx.showToast({ title: '搜索目标: ' + extra, icon: 'none', duration: 1500 });
+    } else if (sortAlgos.includes(algoId)) {
       arr = generateRandomArray(12, 2, 40);
+    } else if (structAlgos.includes(algoId)) {
+      arr = [];
+    } else if (mathAlgos.includes(algoId)) {
+      if (algoId === 'sieve') {
+        extra = 30;
+      } else {
+        arr = 48;
+        extra = 18;
+      }
+    } else if (graphAlgos.includes(algoId)) {
+      arr = [];
     }
 
     try {
-      const result = executeAlgorithm(algoId, arr, target);
+      const result = executeAlgorithm(algoId, arr, extra);
       if (result && result.snapshots) {
         this.snapshots = result.snapshots;
         this.setData({

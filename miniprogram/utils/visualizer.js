@@ -22,7 +22,11 @@ class Visualizer {
       desc: '#7F8C8D',        // 灰色描述
       bg: '#FFFFFF',          // 背景
       barBg: '#34495E',       // 柱子文字
-      found: '#27AE60'        // 查找结果
+      found: '#27AE60',       // 查找结果
+      wall: '#2C3E50',        // 迷宫墙
+      path: '#F1C40F',        // 迷宫路径
+      visited: '#BDC3C7',     // 已访问
+      empty: '#ECF0F1'        // 空地
     };
   }
 
@@ -45,6 +49,10 @@ class Visualizer {
       this.drawStackSnapshot(snapshot);
     } else if (snapshot.type === 'queue') {
       this.drawQueueSnapshot(snapshot);
+    } else if (snapshot.type === 'grid') {
+      this.drawGridSnapshot(snapshot);
+    } else if (snapshot.type === 'gcd') {
+      this.drawGcdSnapshot(snapshot);
     }
 
     // 底部描述文字
@@ -288,6 +296,121 @@ class Visualizer {
       ctx.fillText(`... 还有 ${array.length - maxVisible} 个元素`, w / 2, startY + boxHeight + 4);
     }
   }
+
+  /**
+   * 绘制迷宫网格快照（BFS/DFS）
+   */
+  drawGridSnapshot(snapshot) {
+    const { grid, visited, current, path, newCells, rows, cols } = snapshot;
+    const ctx = this.ctx;
+    const w = this.width;
+    const h = this.height;
+
+    const padding = { top: 30, right: 30, bottom: 70, left: 30 };
+    const areaW = w - padding.left - padding.right;
+    const areaH = h - padding.top - padding.bottom;
+    const cellSize = Math.min(Math.floor(areaW / cols), Math.floor(areaH / rows));
+    const gridW = cellSize * cols;
+    const gridH = cellSize * rows;
+    const offsetX = padding.left + (areaW - gridW) / 2;
+    const offsetY = padding.top + (areaH - gridH) / 2;
+
+    const visitedSet = new Set(visited.map(([r, c]) => `${r},${c}`));
+    const pathSet = new Set(path.map(([r, c]) => `${r},${c}`));
+    const newSet = new Set(newCells.map(([r, c]) => `${r},${c}`));
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const x = offsetX + c * cellSize;
+        const y = offsetY + r * cellSize;
+        const key = `${r},${c}`;
+
+        // 填充颜色
+        if (r === current[0] && c === current[1]) {
+          ctx.fillStyle = '#E74C3C';  // 当前位置：红色
+        } else if (pathSet.has(key)) {
+          ctx.fillStyle = this.colors.path;  // 路径：金色
+        } else if (newSet.has(key)) {
+          ctx.fillStyle = '#3498DB';  // 新发现：蓝色
+        } else if (visitedSet.has(key)) {
+          ctx.fillStyle = this.colors.visited;  // 已访问：灰色
+        } else if (grid[r][c] === 1) {
+          ctx.fillStyle = this.colors.wall;  // 墙：深色
+        } else {
+          ctx.fillStyle = this.colors.empty;  // 空地：浅色
+        }
+
+        ctx.fillRect(x + 1, y + 1, cellSize - 2, cellSize - 2);
+
+        // 起点/终点标记
+        if ((r === 0 && c === 0) || (r === rows - 1 && c === cols - 1)) {
+          ctx.fillStyle = '#FFFFFF';
+          ctx.font = `${cellSize * 0.5}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(r === 0 ? 'S' : 'E', x + cellSize / 2, y + cellSize / 2);
+        }
+      }
+    }
+  },
+
+  /**
+   * 绘制 GCD 快照
+   */
+  drawGcdSnapshot(snapshot) {
+    const { a, b, highlightA, highlightB } = snapshot;
+    const ctx = this.ctx;
+    const w = this.width;
+    const h = this.height;
+
+    const centerY = (h - 70) / 2;
+    const boxW = 120, boxH = 60, gap = 80;
+    const totalW = boxW * 2 + gap;
+    const startX = w / 2 - totalW / 2;
+
+    // 标签
+    ctx.fillStyle = '#2C3E50';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('较大数', startX + boxW / 2, centerY - 70);
+    ctx.fillText('较小数', startX + boxW + gap + boxW / 2, centerY - 70);
+
+    // 变量 a
+    this.roundRect(startX, centerY - boxH / 2, boxW, boxH, 12);
+    ctx.fillStyle = highlightA ? '#E74C3C' : '#4A90D9';
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = highlightA ? '#C0392B' : '#2E6EB5';
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 28px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(a || 0, startX + boxW / 2, centerY);
+
+    // 等号/箭头
+    ctx.fillStyle = '#7F8C8D';
+    ctx.font = '24px sans-serif';
+    ctx.fillText('?', startX + boxW + gap / 2, centerY);
+
+    // 变量 b
+    this.roundRect(startX + boxW + gap, centerY - boxH / 2, boxW, boxH, 12);
+    ctx.fillStyle = highlightB ? '#E74C3C' : '#27AE60';
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = highlightB ? '#C0392B' : '#1E8449';
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(b || 0, startX + boxW + gap + boxW / 2, centerY);
+
+    // 标签 "a" / "b"
+    ctx.fillStyle = '#95A5A6';
+    ctx.font = '12px sans-serif';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('a', startX + boxW - 10, centerY - boxH / 2 - 2);
+    ctx.fillText('b', startX + boxW + gap + 10, centerY - boxH / 2 - 2);
+  },
 
   /**
    * 底部描述区域

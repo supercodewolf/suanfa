@@ -562,6 +562,551 @@ function queueDemo() {
   return { snapshots, result: null };
 }
 
+// ==================== 扩展排序算法 ====================
+
+/**
+ * 希尔排序
+ */
+function shellSort(arr) {
+  const snapshots = [];
+  const array = [...arr];
+  const n = array.length;
+
+  snapshots.push(snapshot(array, [], [], [], '初始数组'));
+
+  for (let gap = Math.floor(n / 2); gap > 0; gap = Math.floor(gap / 2)) {
+    snapshots.push(snapshot(
+      [...array], [], [], [],
+      `使用间隔 gap = ${gap} 进行分组插入排序`
+    ));
+
+    for (let i = gap; i < n; i++) {
+      const temp = array[i];
+      let j = i;
+
+      snapshots.push(snapshot(
+        [...array], [i], [], sortedRange(0, 0),
+        `取出元素 ${temp}（位置${i}），与间隔${gap}之前的元素比较`
+      ));
+
+      while (j >= gap && array[j - gap] > temp) {
+        array[j] = array[j - gap];
+        snapshots.push(snapshot(
+          [...array], [], [j, j - gap], [],
+          `${array[j - gap]} > ${temp}，后移`
+        ));
+        j -= gap;
+      }
+      array[j] = temp;
+      if (j !== i) {
+        snapshots.push(snapshot(
+          [...array], [], [j], [],
+          `将 ${temp} 放入位置 ${j}`
+        ));
+      }
+    }
+  }
+
+  snapshots.push(snapshot([...array], [], [], allIndices(n), '排序完成！'));
+  return { snapshots, result: array };
+}
+
+/**
+ * 鸡尾酒排序
+ */
+function cocktailSort(arr) {
+  const snapshots = [];
+  const array = [...arr];
+  const n = array.length;
+
+  snapshots.push(snapshot(array, [], [], [], '初始数组'));
+
+  let left = 0, right = n - 1;
+  let sorted = [];
+
+  while (left < right) {
+    // 从左到右冒泡
+    let swapped = false;
+    snapshots.push(snapshot(
+      [...array], [], [], [...sorted],
+      `→ 从左到右遍历 [${left}..${right}]，将最大值冒泡到右端`
+    ));
+    for (let i = left; i < right; i++) {
+      snapshots.push(snapshot(
+        [...array], [i, i + 1], [], [...sorted],
+        `比较 ${array[i]} 和 ${array[i + 1]}`
+      ));
+      if (array[i] > array[i + 1]) {
+        [array[i], array[i + 1]] = [array[i + 1], array[i]];
+        swapped = true;
+        snapshots.push(snapshot(
+          [...array], [], [i, i + 1], [...sorted],
+          `交换 ${array[i + 1]} 和 ${array[i]}`
+        ));
+      }
+    }
+    sorted.push(right);
+    right--;
+    snapshots.push(snapshot(
+      [...array], [], [], [...sorted],
+      `最大值 ${array[right + 1]} 已到达位置 ${right + 1}`
+    ));
+
+    if (!swapped) break;
+
+    // 从右到左冒泡
+    swapped = false;
+    snapshots.push(snapshot(
+      [...array], [], [], [...sorted],
+      `← 从右到左遍历 [${left}..${right}]，将最小值冒泡到左端`
+    ));
+    for (let i = right; i > left; i--) {
+      snapshots.push(snapshot(
+        [...array], [i - 1, i], [], [...sorted],
+        `比较 ${array[i - 1]} 和 ${array[i]}`
+      ));
+      if (array[i - 1] > array[i]) {
+        [array[i - 1], array[i]] = [array[i], array[i - 1]];
+        swapped = true;
+        snapshots.push(snapshot(
+          [...array], [], [i - 1, i], [...sorted],
+          `交换 ${array[i]} 和 ${array[i - 1]}`
+        ));
+      }
+    }
+    sorted.push(left);
+    left++;
+    snapshots.push(snapshot(
+      [...array], [], [], [...sorted],
+      `最小值 ${array[left - 1]} 已到达位置 ${left - 1}`
+    ));
+
+    if (!swapped) break;
+  }
+
+  snapshots.push(snapshot([...array], [], [], allIndices(n), '排序完成！'));
+  return { snapshots, result: array };
+}
+
+/**
+ * 计数排序
+ */
+function countingSort(arr) {
+  const snapshots = [];
+  const array = [...arr];
+  const n = array.length;
+  const min = Math.min(...array);
+  const max = Math.max(...array);
+  const range = max - min + 1;
+
+  snapshots.push(snapshot(array, [], [], [], `初始数组 (范围: ${min}~${max})`));
+
+  // 计数
+  const count = new Array(range).fill(0);
+  for (let i = 0; i < n; i++) {
+    count[array[i] - min]++;
+    snapshots.push(snapshot(
+      [...array], [i], [], [],
+      `统计 ${array[i]} 出现次数: count[${array[i] - min}] = ${count[array[i] - min]}`
+    ));
+  }
+
+  // 累加计数
+  snapshots.push(snapshot([...array], [], [], [], '累加计数，确定每个值的最终位置'));
+  for (let i = 1; i < range; i++) {
+    count[i] += count[i - 1];
+  }
+
+  // 放置元素（反向遍历保证稳定性）
+  const output = new Array(n);
+  for (let i = n - 1; i >= 0; i--) {
+    const idx = count[array[i] - min] - 1;
+    output[idx] = array[i];
+    count[array[i] - min]--;
+    snapshots.push(snapshot(
+      [...output], [i], [idx], sortedRange(n - i - 1, n),
+      `将 ${array[i]} 放到排序后位置 ${idx}`
+    ));
+  }
+
+  snapshots.push(snapshot(output, [], [], allIndices(n), '排序完成！'));
+  return { snapshots, result: output };
+}
+
+// ==================== 扩展搜索算法 ====================
+
+/**
+ * 跳跃搜索
+ */
+function jumpSearch(arr, target) {
+  const snapshots = [];
+  const sorted = [...arr].sort((a, b) => a - b);
+  const n = sorted.length;
+  const step = Math.floor(Math.sqrt(n));
+
+  snapshots.push(snapshot(sorted, [], [], [], `开始跳跃搜索目标值 ${target}，步长 = ${step}`));
+
+  let prev = 0;
+  while (sorted[Math.min(step, n) - 1] < target) {
+    snapshots.push(snapshot(
+      [...sorted], [Math.min(step, n) - 1], [], [],
+      `跳跃到位置 ${Math.min(step, n) - 1} = ${sorted[Math.min(step, n) - 1]} < ${target}`,
+      { left: prev, right: Math.min(step, n) - 1, mid: Math.min(step, n) - 1 }
+    ));
+    prev = step;
+    step += Math.floor(Math.sqrt(n));
+    if (prev >= n) {
+      snapshots.push(snapshot(sorted, [], [], [], `未找到目标值 ${target}`));
+      return { snapshots, result: -1 };
+    }
+  }
+
+  snapshots.push(snapshot(
+    [...sorted], [prev], [], [],
+    `在区间 [${prev}..${Math.min(step, n) - 1}] 中线性搜索`,
+    { left: prev, right: Math.min(step, n) - 1, mid: prev }
+  ));
+
+  while (prev < Math.min(step, n)) {
+    snapshots.push(snapshot(
+      [...sorted], [prev], [], [],
+      `检查位置 ${prev}：${sorted[prev]} == ${target} ?`,
+      { left: prev, right: Math.min(step, n) - 1, mid: prev }
+    ));
+    if (sorted[prev] === target) {
+      snapshots.push(snapshot(
+        [...sorted], [], [prev], [],
+        `找到！目标值 ${target} 在位置 ${prev}`
+      ));
+      return { snapshots, result: prev };
+    }
+    prev++;
+  }
+
+  snapshots.push(snapshot(sorted, [], [], [], `未找到目标值 ${target}`));
+  return { snapshots, result: -1 };
+}
+
+/**
+ * 插值搜索
+ */
+function interpolationSearch(arr, target) {
+  const snapshots = [];
+  const sorted = [...arr].sort((a, b) => a - b);
+  const n = sorted.length;
+
+  snapshots.push(snapshot(sorted, [], [], [], `开始插值搜索目标值 ${target}`));
+
+  let low = 0, high = n - 1;
+
+  while (low <= high && target >= sorted[low] && target <= sorted[high]) {
+    if (low === high) {
+      if (sorted[low] === target) {
+        snapshots.push(snapshot(sorted, [], [low], [], `找到！目标值 ${target} 在位置 ${low}`));
+        return { snapshots, result: low };
+      }
+      break;
+    }
+
+    // 插值公式
+    const pos = low + Math.floor(((target - sorted[low]) * (high - low)) / (sorted[high] - sorted[low]));
+
+    snapshots.push(snapshot(
+      [...sorted], [pos], [], [],
+      `插值估算位置 ${pos}，值 = ${sorted[pos]}，与 ${target} 比较`,
+      { left: low, right: high, mid: pos }
+    ));
+
+    if (sorted[pos] === target) {
+      snapshots.push(snapshot(
+        [...sorted], [], [pos], [],
+        `找到！目标值 ${target} 在位置 ${pos}`,
+        { left: low, right: high, mid: pos }
+      ));
+      return { snapshots, result: pos };
+    } else if (sorted[pos] < target) {
+      low = pos + 1;
+      snapshots.push(snapshot(
+        [...sorted], [], [], [],
+        `${sorted[pos]} < ${target}，搜索右侧 [${low}..${high}]`,
+        { left: low, right: high, mid: pos }
+      ));
+    } else {
+      high = pos - 1;
+      snapshots.push(snapshot(
+        [...sorted], [], [], [],
+        `${sorted[pos]} > ${target}，搜索左侧 [${low}..${high}]`,
+        { left: low, right: high, mid: pos }
+      ));
+    }
+  }
+
+  snapshots.push(snapshot(sorted, [], [], [], `未找到目标值 ${target}`));
+  return { snapshots, result: -1 };
+}
+
+// ==================== 数学算法 ====================
+
+/**
+ * 埃拉托色尼筛法
+ */
+function sieveOfEratosthenes(N) {
+  const snapshots = [];
+  N = N || 30;
+  const isPrime = new Array(N + 1).fill(true);
+  isPrime[0] = isPrime[1] = false;
+  const primes = [];
+
+  // 用数字 2..N 作为展示数组
+  const displayArr = [];
+  for (let i = 2; i <= N; i++) displayArr.push(i);
+
+  snapshots.push(snapshot(
+    [...displayArr], [], [], [],
+    `列出 2 到 ${N} 的所有整数`
+  ));
+
+  for (let p = 2; p * p <= N; p++) {
+    if (isPrime[p]) {
+      primes.push(p);
+      snapshots.push(snapshot(
+        [...displayArr], [p - 2], [], [...primes.map(x => x - 2)],
+        `${p} 是素数！标记 ${p} 的所有倍数（${p * 2}, ${p * 3}...）`
+      ));
+
+      for (let m = p * p; m <= N; m += p) {
+        isPrime[m] = false;
+        snapshots.push(snapshot(
+          [...displayArr], [p - 2], [m - 2], [...primes.map(x => x - 2)],
+          `标记 ${m} 为非素数（${p} 的倍数）`
+        ));
+      }
+    }
+  }
+
+  // 收集剩余素数
+  for (let p = Math.floor(Math.sqrt(N)) + 1; p <= N; p++) {
+    if (isPrime[p]) primes.push(p);
+  }
+
+  snapshots.push(snapshot(
+    [...displayArr], [], [], [...primes.map(x => x - 2)],
+    `筛选完成！2..${N} 中共有 ${primes.length} 个素数`
+  ));
+
+  return { snapshots, result: primes };
+}
+
+/**
+ * 欧几里得算法（辗转相除法）
+ */
+function euclideanGCD(a, b) {
+  const snapshots = [];
+  a = a || 48;
+  b = b || 18;
+
+  let x = Math.max(a, b);
+  let y = Math.min(a, b);
+
+  snapshots.push({
+    type: 'gcd',
+    a: x, b: y,
+    description: `计算 GCD(${a}, ${b})`,
+    highlightA: false, highlightB: false
+  });
+
+  while (y !== 0) {
+    const remainder = x % y;
+    snapshots.push({
+      type: 'gcd',
+      a: x, b: y,
+      description: `${x} ÷ ${y} = ${Math.floor(x / y)} ... 余 ${remainder}`,
+      highlightA: true, highlightB: true
+    });
+    x = y;
+    y = remainder;
+    if (y !== 0) {
+      snapshots.push({
+        type: 'gcd',
+        a: x, b: y,
+        description: `继续：GCD(${x}, ${y})`,
+        highlightA: false, highlightB: false
+      });
+    }
+  }
+
+  snapshots.push({
+    type: 'gcd',
+    a: x, b: 0,
+    description: `余数为0！最大公约数 GCD(${a}, ${b}) = ${x}`,
+    highlightA: true, highlightB: false
+  });
+
+  return { snapshots, result: x };
+}
+
+// ==================== 图算法（迷宫） ====================
+
+/**
+ * 生成简单的迷宫网格
+ */
+function generateMaze() {
+  // 7x7 网格，1=墙 0=路
+  const grid = [
+    [0, 0, 0, 1, 0, 0, 0],
+    [0, 1, 0, 1, 0, 1, 0],
+    [0, 1, 0, 0, 0, 1, 0],
+    [0, 1, 1, 1, 0, 1, 0],
+    [0, 0, 0, 0, 0, 1, 0],
+    [0, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0, 1, 0]
+  ];
+  return { grid, start: [0, 0], end: [6, 6], rows: 7, cols: 7 };
+}
+
+/**
+ * BFS 走迷宫
+ */
+function bfsMaze() {
+  const snapshots = [];
+  const { grid, start, end, rows, cols } = generateMaze();
+
+  snapshots.push(buildGridSnapshot(grid, [], [], [], [], `BFS 迷宫寻路：从 (${start[0]},${start[1]}) 到 (${end[0]},${end[1]})`));
+
+  const queue = [[start[0], start[1]]];
+  const visited = new Set();
+  const parent = {};
+  visited.add(`${start[0]},${start[1]}`);
+  parent[`${start[0]},${start[1]}`] = null;
+
+  const dirs = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+
+  while (queue.length > 0) {
+    const [r, c] = queue.shift();
+
+    snapshots.push(buildGridSnapshot(
+      grid, [...visited].map(s => s.split(',').map(Number)),
+      [r, c], [], [],
+      `访问节点 (${r}, ${c})`
+    ));
+
+    if (r === end[0] && c === end[1]) {
+      // 重建路径
+      const path = [];
+      let cur = `${r},${c}`;
+      while (cur) {
+        path.push(cur.split(',').map(Number));
+        cur = parent[cur];
+      }
+      path.reverse();
+
+      snapshots.push(buildGridSnapshot(
+        grid, [...visited].map(s => s.split(',').map(Number)),
+        end, path, [],
+        `找到目标！最短路径长度 = ${path.length - 1}`
+      ));
+      return { snapshots, result: path };
+    }
+
+    for (const [dr, dc] of dirs) {
+      const nr = r + dr, nc = c + dc;
+      const key = `${nr},${nc}`;
+      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc] === 0 && !visited.has(key)) {
+        visited.add(key);
+        parent[key] = `${r},${c}`;
+        queue.push([nr, nc]);
+
+        snapshots.push(buildGridSnapshot(
+          grid, [...visited].map(s => s.split(',').map(Number)),
+          [r, c], [], [[nr, nc]],
+          `发现邻居 (${nr}, ${nc})，加入队列`
+        ));
+      }
+    }
+  }
+
+  snapshots.push(buildGridSnapshot(grid, [], [], [], [], '未找到路径'));
+  return { snapshots, result: null };
+}
+
+/**
+ * DFS 走迷宫
+ */
+function dfsMaze() {
+  const snapshots = [];
+  const { grid, start, end, rows, cols } = generateMaze();
+
+  snapshots.push(buildGridSnapshot(grid, [], [], [], [], `DFS 迷宫寻路：从 (${start[0]},${start[1]}) 到 (${end[0]},${end[1]})`));
+
+  const stack = [[start[0], start[1]]];
+  const visited = new Set();
+  const parent = {};
+  visited.add(`${start[0]},${start[1]}`);
+  parent[`${start[0]},${start[1]}`] = null;
+
+  const dirs = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+
+  while (stack.length > 0) {
+    const [r, c] = stack.pop();
+
+    snapshots.push(buildGridSnapshot(
+      grid, [...visited].map(s => s.split(',').map(Number)),
+      [r, c], [], [],
+      `访问节点 (${r}, ${c})`
+    ));
+
+    if (r === end[0] && c === end[1]) {
+      const path = [];
+      let cur = `${r},${c}`;
+      while (cur) {
+        path.push(cur.split(',').map(Number));
+        cur = parent[cur];
+      }
+      path.reverse();
+
+      snapshots.push(buildGridSnapshot(
+        grid, [...visited].map(s => s.split(',').map(Number)),
+        end, path, [],
+        `找到目标！路径长度 = ${path.length - 1}`
+      ));
+      return { snapshots, result: path };
+    }
+
+    for (const [dr, dc] of dirs) {
+      const nr = r + dr, nc = c + dc;
+      const key = `${nr},${nc}`;
+      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc] === 0 && !visited.has(key)) {
+        visited.add(key);
+        parent[key] = `${r},${c}`;
+        stack.push([nr, nc]);
+
+        snapshots.push(buildGridSnapshot(
+          grid, [...visited].map(s => s.split(',').map(Number)),
+          [r, c], [], [[nr, nc]],
+          `发现邻居 (${nr}, ${nc})，压入栈`
+        ));
+      }
+    }
+  }
+
+  snapshots.push(buildGridSnapshot(grid, [], [], [], [], '未找到路径'));
+  return { snapshots, result: null };
+}
+
+function buildGridSnapshot(grid, visited, current, path, newCells, description) {
+  return {
+    type: 'grid',
+    grid: grid.map(r => [...r]),
+    visited: visited.map(v => [...v]),
+    current: [...current],
+    path: path.map(p => [...p]),
+    newCells: newCells.map(c => [...c]),
+    rows: grid.length,
+    cols: grid[0].length,
+    description
+  };
+}
+
 // ==================== 工具函数 ====================
 
 function snapshot(array, comparing, swapping, sorted, description, _searchMeta) {
@@ -599,34 +1144,44 @@ function generateRandomArray(length = 10, min = 1, max = 50) {
 
 /**
  * 根据算法ID执行对应算法
+ * @param {string} algoId 算法ID
+ * @param {Array} arr 数组参数（可选，部分算法不需要）
+ * @param {*} extra 额外参数（搜索算法的target、筛法的N、GCD的第二个数等）
  */
-function executeAlgorithm(algoId, arr, target) {
+function executeAlgorithm(algoId, arr, extra) {
   switch (algoId) {
-    case 'bubble':    return bubbleSort(arr);
-    case 'selection': return selectionSort(arr);
-    case 'insertion': return insertionSort(arr);
-    case 'quick':     return quickSort(arr);
-    case 'merge':     return mergeSort(arr);
-    case 'heap':      return heapSort(arr);
-    case 'linear':    return linearSearch(arr, target);
-    case 'binary':    return binarySearch(arr, target);
-    case 'stack':     return stackDemo();
-    case 'queue':     return queueDemo();
-    default:          return null;
+    case 'bubble':         return bubbleSort(arr);
+    case 'selection':      return selectionSort(arr);
+    case 'insertion':      return insertionSort(arr);
+    case 'shell':          return shellSort(arr);
+    case 'cocktail':       return cocktailSort(arr);
+    case 'counting':       return countingSort(arr);
+    case 'quick':          return quickSort(arr);
+    case 'merge':          return mergeSort(arr);
+    case 'heap':           return heapSort(arr);
+    case 'linear':         return linearSearch(arr, extra);
+    case 'binary':         return binarySearch(arr, extra);
+    case 'jump':           return jumpSearch(arr, extra);
+    case 'interpolation':  return interpolationSearch(arr, extra);
+    case 'sieve':          return sieveOfEratosthenes(extra || 30);
+    case 'gcd':            return euclideanGCD(arr || 48, extra || 18);
+    case 'bfs':            return bfsMaze();
+    case 'dfs':            return dfsMaze();
+    case 'stack':          return stackDemo();
+    case 'queue':          return queueDemo();
+    default:               return null;
   }
 }
 
 module.exports = {
-  bubbleSort,
-  selectionSort,
-  insertionSort,
-  quickSort,
-  mergeSort,
-  heapSort,
-  linearSearch,
-  binarySearch,
-  stackDemo,
-  queueDemo,
+  bubbleSort, selectionSort, insertionSort,
+  shellSort, cocktailSort, countingSort,
+  quickSort, mergeSort, heapSort,
+  linearSearch, binarySearch,
+  jumpSearch, interpolationSearch,
+  sieveOfEratosthenes, euclideanGCD,
+  bfsMaze, dfsMaze,
+  stackDemo, queueDemo,
   generateRandomArray,
   executeAlgorithm
 };

@@ -583,45 +583,113 @@ class Visualizer {
    * 绘制快速幂快照
    */
   drawFastPowerSnapshot(snapshot) {
-    const { base, exp, result } = snapshot;
+    const { base, exp, result, total, action, prevBase, prevExp, prevResult } = snapshot;
     const ctx = this.ctx;
     const w = this.width;
     const h = this.height;
 
-    const centerY = (h - 70) / 2;
-    const boxW = 100, boxH = 50, gap = 30;
+    // 顶部公式
+    ctx.fillStyle = '#2C3E50';
+    ctx.font = 'bold 20px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(total || `${base}^${exp}`, w / 2, 12);
+
+    // 如果完成，大号显示结果
+    if (action === 'done') {
+      ctx.fillStyle = '#27AE60';
+      ctx.font = 'bold 36px sans-serif';
+      ctx.fillText(`= ${result}`, w / 2, 38);
+      ctx.textBaseline = 'middle';
+    } else {
+      ctx.fillStyle = '#95A5A6';
+      ctx.font = '13px sans-serif';
+      ctx.textBaseline = 'top';
+      ctx.fillText('正在转化中...', w / 2, 36);
+    }
+
+    const centerY = (h - 60) / 2 + 20;
+    const boxW = 100, boxH = 52, gap = 24;
     const totalW = boxW * 3 + gap * 2;
     const startX = w / 2 - totalW / 2;
 
-    const labels = ['底数 base', '指数 exp', '结果 result'];
-    const values = [String(base), String(exp), String(result)];
-    const colors = ['#4A90D9', '#E67E22', '#27AE60'];
+    const boxDefs = [
+      { label: '底数 base',  value: base,   color: '#4A90D9', prev: prevBase,  change: base !== prevBase },
+      { label: '指数 exp',  value: exp,     color: '#E67E22', prev: prevExp,   change: exp !== prevExp },
+      { label: '结果 result', value: result, color: '#27AE60', prev: prevResult, change: result !== prevResult }
+    ];
 
     for (let i = 0; i < 3; i++) {
+      const def = boxDefs[i];
       const x = startX + i * (boxW + gap);
+
+      // 变化箭头（旧值 → 新值）
+      if (def.change && def.prev !== undefined) {
+        ctx.fillStyle = '#E74C3C';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(`${def.prev} →`, x + boxW / 2, centerY - boxH / 2 - 26);
+      }
 
       // 标签
       ctx.fillStyle = '#95A5A6';
-      ctx.font = '11px sans-serif';
+      ctx.font = '10px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
-      ctx.fillText(labels[i], x + boxW / 2, centerY - boxH / 2 - 8);
+      ctx.fillText(def.label, x + boxW / 2, centerY - boxH / 2 - 8);
 
       // 框
+      const glow = def.change || (action === 'odd_mult' && i === 2) || (action === 'square_halve' && i <= 1);
       this.roundRect(x, centerY - boxH / 2, boxW, boxH, 10);
-      ctx.fillStyle = colors[i];
-      ctx.fill();
-      ctx.strokeStyle = colors[i];
+
+      if (glow) {
+        ctx.fillStyle = def.color;
+        ctx.shadowColor = def.color;
+        ctx.shadowBlur = 12;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      } else {
+        ctx.fillStyle = def.color;
+        ctx.globalAlpha = 0.5;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      ctx.strokeStyle = def.color;
       ctx.lineWidth = 2;
       ctx.stroke();
 
       // 值
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 24px sans-serif';
+      ctx.font = 'bold 22px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(values[i], x + boxW / 2, centerY);
+      ctx.fillText(String(def.value), x + boxW / 2, centerY);
     }
+
+    // 操作指示条
+    const opColors = {
+      init: { bg: '#7F8C8D', text: '开始', icon: '▶' },
+      odd_mult: { bg: '#E74C3C', text: '指数是奇数 → result × base', icon: '✕' },
+      square_halve: { bg: '#3498DB', text: '底数平方 + 指数折半', icon: '²' },
+      done_halve: { bg: '#27AE60', text: '底数平方 + 指数归零 → 得出答案', icon: '✓' },
+      done: { bg: '#27AE60', text: '计算完成', icon: '★' }
+    };
+
+    const op = opColors[action] || opColors.init;
+    const opY = centerY + boxH / 2 + 16;
+    const opW = 220, opH = 24;
+    const opX = w / 2 - opW / 2;
+
+    this.roundRect(opX, opY, opW, opH, 12);
+    ctx.fillStyle = op.bg;
+    ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`${op.icon} ${op.text}`, w / 2, opY + opH / 2);
   }
 
   /**

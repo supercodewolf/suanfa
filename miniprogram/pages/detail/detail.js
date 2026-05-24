@@ -106,7 +106,7 @@ Page({
       if (algoId === 'sieve') {
         extra = 30;
       } else if (algoId === 'fastpower') {
-        arr = 2; extra = 13;
+        arr = 2; extra = 5;
       } else {
         arr = 48; extra = 18;
       }

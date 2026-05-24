@@ -1453,7 +1453,7 @@ function buildTableRows(dp, maxRow, totalRows) {
 function fastPower(a, n) {
   const snapshots = [];
   a = a || 2;
-  n = n || 13;
+  n = n || 5;  // 用 2^5=32 更简短易理解
 
   let base = a;
   let exp = n;
@@ -1461,34 +1461,45 @@ function fastPower(a, n) {
 
   snapshots.push({
     type: 'fastpower',
-    base, exp, result,
-    description: `计算 ${a}^${n}，初始化 result=1`
+    base, exp, result, total: `${a}^${n}`,
+    action: 'init',
+    prevBase: base, prevExp: exp, prevResult: result,
+    description: `${a}^${n}：初始 result=1`
   });
 
   while (exp > 0) {
     if (exp % 2 === 1) {
-      const oldResult = result;
+      const prevResult = result;
       result = result * base;
       snapshots.push({
         type: 'fastpower',
-        base, exp, result,
-        description: `指数 ${exp} 为奇数，result = ${oldResult} × ${base} = ${result}`
+        base, exp, result, total: `${a}^${n}`,
+        action: 'odd_mult',
+        prevBase: base, prevExp: exp, prevResult,
+        description: `指数 ${exp} 是奇数 → result × base = ${prevResult} × ${base} = ${result}`
       });
     }
+    const prevExp = exp;
+    const prevBase = base;
     exp = Math.floor(exp / 2);
-    const oldBase = base;
     base = base * base;
     snapshots.push({
       type: 'fastpower',
-      base, exp, result,
-      description: `底数平方 ${oldBase}² = ${base}，指数折半 → ${exp}`
+      base, exp, result, total: `${a}^${n}`,
+      action: exp === 0 ? 'done_halve' : 'square_halve',
+      prevBase, prevExp, prevResult: result,
+      description: exp === 0
+        ? `底数平方 ${prevBase}²=${base}，指数归零 → 得出答案 ${result}`
+        : `底数平方：${prevBase}²=${base}，指数折半：${prevExp}÷2=${exp}`
     });
   }
 
   snapshots.push({
     type: 'fastpower',
-    base, exp, result,
-    description: `结果：${a}^${n} = ${result}`
+    base: a, exp: n, result, total: `${a}^${n}`,
+    action: 'done',
+    prevBase: a, prevExp: n, prevResult: result,
+    description: `${a}^${n} = ${result}`
   });
 
   return { snapshots, result };
@@ -1558,7 +1569,7 @@ function executeAlgorithm(algoId, arr, extra) {
     case 'knapsack':       return knapsack01(null);
     case 'sieve':          return sieveOfEratosthenes(extra || 30);
     case 'gcd':            return euclideanGCD(arr || 48, extra || 18);
-    case 'fastpower':      return fastPower(arr || 2, extra || 13);
+    case 'fastpower':      return fastPower(arr || 2, extra || 5);
     case 'bfs':            return bfsMaze();
     case 'dfs':            return dfsMaze();
     case 'stack':          return stackDemo();

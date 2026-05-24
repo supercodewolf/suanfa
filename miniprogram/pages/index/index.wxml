@@ -1,0 +1,62 @@
+<!--首页 - 算法分类与列表-->
+<view class="container">
+  <!-- 顶部标题 -->
+  <view class="header">
+    <text class="header-icon">🧠</text>
+    <text class="header-title">算法可视化学习</text>
+    <text class="header-subtitle">通过动画直观理解算法原理</text>
+  </view>
+
+  <!-- 分类卡片列表 -->
+  <view class="category-list">
+    <view
+      class="category-card"
+      wx:for="{{categories}}"
+      wx:key="id"
+      style="--card-color: {{item.color}}"
+    >
+      <!-- 分类标题栏 -->
+      <view class="category-header" bindtap="toggleCategory" data-id="{{item.id}}">
+        <view class="category-title-row">
+          <text class="category-icon">{{item.icon}}</text>
+          <text class="category-name">{{item.name}}</text>
+          <text class="category-count">{{item.algorithms.length}}个</text>
+        </view>
+        <text class="arrow {{item.expanded ? 'expanded' : ''}}">▾</text>
+      </view>
+
+      <!-- 算法列表（展开时显示） -->
+      <view class="algo-list {{item.expanded ? 'expanded' : ''}}">
+        <view
+          class="algo-item"
+          wx:for="{{item.algorithms}}"
+          wx:for-item="algo"
+          wx:key="id"
+          bindtap="goDetail"
+          data-id="{{algo.id}}"
+        >
+          <!-- 左侧信息 -->
+          <view class="algo-info">
+            <text class="algo-name">{{algo.name}}</text>
+            <view class="algo-meta">
+              <text class="algo-tag {{algo.difficulty === '入门' ? 'tag-easy' : algo.difficulty === '进阶' ? 'tag-medium' : 'tag-hard'}}">{{algo.difficulty}}</text>
+              <text class="algo-complexity">{{algo.timeComplexity}}</text>
+            </view>
+          </view>
+          <!-- 右侧箭头 -->
+          <view class="algo-arrow-wrap">
+            <view class="algo-preview-bar" style="background: {{item.color}}">
+              <view wx:for="{{[1,2,3,4,5]}}" wx:key="*this" class="mini-bar" style="height: {{30 + index * 15}}rpx"></view>
+            </view>
+            <text class="arrow-right">›</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部提示 -->
+  <view class="footer-tip">
+    <text>💡 点击算法名称即可进入可视化演示</text>
+  </view>
+</view>

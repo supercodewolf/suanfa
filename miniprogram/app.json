@@ -1,0 +1,14 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/detail/detail"
+  ],
+  "window": {
+    "navigationBarTitleText": "算法可视化学习",
+    "navigationBarBackgroundColor": "#2C3E50",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F5F7FA",
+    "backgroundTextStyle": "light"
+  },
+  "sitemapLocation": "sitemap.json"
+}

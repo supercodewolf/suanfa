@@ -1,0 +1,93 @@
+<!--详情页 - Canvas 可视化 + 控制面板-->
+<view class="container">
+  <!-- 顶部算法信息 -->
+  <view class="info-bar">
+    <view class="info-left">
+      <text class="info-name">{{algorithm.name}}</text>
+      <text class="info-difficulty {{algorithm.difficulty === '入门' ? 'diff-easy' : algorithm.difficulty === '进阶' ? 'diff-medium' : 'diff-hard'}}">{{algorithm.difficulty}}</text>
+    </view>
+    <view class="info-right">
+      <text class="info-complexity">{{algorithm.timeComplexity}}</text>
+    </view>
+  </view>
+
+  <!-- Canvas 可视化区域 -->
+  <view class="canvas-area">
+    <canvas
+      type="2d"
+      id="vizCanvas"
+      class="canvas"
+    ></canvas>
+  </view>
+
+  <!-- 播放控制 -->
+  <view class="controls">
+    <!-- 进度条 -->
+    <view class="progress-wrap">
+      <view class="progress-bar" bindtouchstart="onProgressStart" bindtouchmove="onProgressMove" bindtouchend="onProgressEnd">
+        <view class="progress-fill" style="width: {{progressPercent}}%"></view>
+        <view class="progress-dot" style="left: {{progressPercent}}%"></view>
+      </view>
+      <text class="progress-text">{{currentStep + 1}} / {{totalSteps}}</text>
+    </view>
+
+    <!-- 按钮组 -->
+    <view class="btn-group">
+      <view class="control-btn" bindtap="reset">
+        <text class="btn-icon">⏮</text>
+        <text class="btn-label">重置</text>
+      </view>
+      <view class="control-btn" bindtap="stepBackward">
+        <text class="btn-icon">◀</text>
+        <text class="btn-label">上一步</text>
+      </view>
+      <view class="control-btn primary-btn {{isPlaying ? 'playing' : ''}}" bindtap="togglePlay">
+        <text class="btn-icon">{{isPlaying ? '⏸' : '▶'}}</text>
+        <text class="btn-label">{{isPlaying ? '暂停' : '播放'}}</text>
+      </view>
+      <view class="control-btn" bindtap="stepForward">
+        <text class="btn-icon">▶</text>
+        <text class="btn-label">下一步</text>
+      </view>
+      <view class="control-btn" bindtap="setSpeed">
+        <text class="btn-icon">🐢</text>
+        <text class="btn-label">{{speed}}x</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 算法说明卡片 -->
+  <view class="info-card">
+    <view class="card-title">📖 算法说明</view>
+    <text class="card-desc">{{algorithm.description}}</text>
+
+    <view class="card-steps">
+      <view class="step-title">执行步骤</view>
+      <view class="step-item" wx:for="{{algorithm.steps}}" wx:key="*this" wx:for-item="step">
+        <text class="step-num">{{index + 1}}</text>
+        <text class="step-text">{{step}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 复杂度卡片 -->
+  <view class="complexity-card">
+    <view class="comp-item">
+      <text class="comp-label">时间复杂度</text>
+      <text class="comp-value">{{algorithm.timeComplexity}}</text>
+    </view>
+    <view class="comp-divider"></view>
+    <view class="comp-item">
+      <text class="comp-label">空间复杂度</text>
+      <text class="comp-value">{{algorithm.spaceComplexity}}</text>
+    </view>
+    <view wx:if="{{algorithm.stable !== null}}" class="comp-divider"></view>
+    <view wx:if="{{algorithm.stable !== null}}" class="comp-item">
+      <text class="comp-label">稳定性</text>
+      <text class="comp-value">{{algorithm.stable ? '✅ 稳定' : '❌ 不稳定'}}</text>
+    </view>
+  </view>
+
+  <!-- 底部间距 -->
+  <view style="height: 40rpx;"></view>
+</view>

@@ -352,7 +352,7 @@ class Visualizer {
         }
       }
     }
-  },
+  }
 
   /**
    * 绘制 GCD 快照
@@ -410,7 +410,7 @@ class Visualizer {
     ctx.textBaseline = 'bottom';
     ctx.fillText('a', startX + boxW - 10, centerY - boxH / 2 - 2);
     ctx.fillText('b', startX + boxW + gap + 10, centerY - boxH / 2 - 2);
-  },
+  }
 
   /**
    * 底部描述区域

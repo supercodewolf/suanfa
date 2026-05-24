@@ -1379,7 +1379,7 @@ function knapsack01(config) {
     type: 'table',
     headers: ['物品\\容量', ...Array.from({ length: capacity + 1 }, (_, i) => String(i))],
     rows: buildTableRows(dp, 0, n + 1),
-    highlight: { row: 0, col: 0 },
+    highlight: { row: 0, col: 1 },
     description: `0/1背包：${n}个物品，容量=${capacity}`
   });
 
@@ -1394,7 +1394,7 @@ function knapsack01(config) {
           type: 'table',
           headers: ['物品\\容量', ...Array.from({ length: capacity + 1 }, (_, k) => String(k))],
           rows: buildTableRows(dp, i, n + 1),
-          highlight: { row: i, col: j },
+          highlight: { row: i, col: j + 1 },
           description: `物品${i}(重${w},值${v}) 放不进容量${j}，继承 dp[${i - 1}][${j}]=${dp[i - 1][j]}`
         });
       } else {
@@ -1405,8 +1405,8 @@ function knapsack01(config) {
           type: 'table',
           headers: ['物品\\容量', ...Array.from({ length: capacity + 1 }, (_, k) => String(k))],
           rows: buildTableRows(dp, i, n + 1),
-          highlight: { row: i, col: j },
-          description: `物品${i}(${w}/${v})：不选=${skip}，选=${take} → ${dp[i][j]}`
+          highlight: { row: i, col: j + 1 },
+          description: `物品${i}(${w}kg/${v}元)：不选=${skip}元，选=${take}元 → ${dp[i][j]}元`
         });
       }
     }
@@ -1416,8 +1416,8 @@ function knapsack01(config) {
     type: 'table',
     headers: ['物品\\容量', ...Array.from({ length: capacity + 1 }, (_, k) => String(k))],
     rows: buildTableRows(dp, n, n + 1),
-    highlight: { row: n, col: capacity },
-    description: `最大价值 = ${dp[n][capacity]}`
+    highlight: { row: n, col: capacity + 1 },
+    description: `最大价值 = ${dp[n][capacity]} 元`
   });
 
   return { snapshots, result: dp[n][capacity] };

@@ -1368,10 +1368,13 @@ function fibonacciDP(N) {
 function knapsack01(config) {
   const snapshots = [];
   config = config || {};
-  const weights = config.weights || [2, 3, 4, 5];
-  const values = config.values || [3, 4, 5, 8];
-  const capacity = config.capacity || 8;
+  const weights = config.weights || [2, 3, 4];   // 3个物品，更易理解
+  const values = config.values || [3, 4, 5];
+  const capacity = config.capacity || 5;           // 较小容量
   const n = weights.length;
+
+  const itemNames = weights.map((w, i) => `物品${i + 1}`);
+  const itemsArray = weights.map((w, i) => ({ name: itemNames[i], weight: w, value: values[i] }));
 
   const dp = Array.from({ length: n + 1 }, () => new Array(capacity + 1).fill(0));
 
@@ -1379,8 +1382,9 @@ function knapsack01(config) {
     type: 'table',
     headers: ['物品\\容量', ...Array.from({ length: capacity + 1 }, (_, i) => String(i))],
     rows: buildTableRows(dp, 0, n + 1),
-    highlight: { row: 0, col: 1 },
-    description: `0/1背包：${n}个物品，容量=${capacity}`
+    highlight: { row: 0, col: 1, fromA: null, fromB: null },
+    items: itemsArray, currentItem: 0,
+    description: `0/1背包：${n}个物品，背包容量${capacity}kg`
   });
 
   for (let i = 1; i <= n; i++) {
@@ -1388,25 +1392,32 @@ function knapsack01(config) {
     const v = values[i - 1];
 
     for (let j = 0; j <= capacity; j++) {
+      const fromA = { row: i - 1, col: j + 1, label: '不选(继承)' };
+
       if (w > j) {
         dp[i][j] = dp[i - 1][j];
         snapshots.push({
           type: 'table',
           headers: ['物品\\容量', ...Array.from({ length: capacity + 1 }, (_, k) => String(k))],
           rows: buildTableRows(dp, i, n + 1),
-          highlight: { row: i, col: j + 1 },
-          description: `物品${i}(重${w},值${v}) 放不进容量${j}，继承 dp[${i - 1}][${j}]=${dp[i - 1][j]}`
+          highlight: { row: i, col: j + 1, fromA, fromB: null },
+          items: itemsArray, currentItem: i,
+          description: `物品${i}(重${w}kg,值${v}元) 太重了！容量${j}kg 装不下 → 只能不选，拷贝上一行同列 ${dp[i][j]}元`
         });
       } else {
         const skip = dp[i - 1][j];
         const take = dp[i - 1][j - w] + v;
+        const fromB = { row: i - 1, col: j - w + 1, label: '选(腾空间)' };
         dp[i][j] = Math.max(skip, take);
+
+        const chosen = skip >= take ? '不选更优' : '放入更优';
         snapshots.push({
           type: 'table',
           headers: ['物品\\容量', ...Array.from({ length: capacity + 1 }, (_, k) => String(k))],
           rows: buildTableRows(dp, i, n + 1),
-          highlight: { row: i, col: j + 1 },
-          description: `物品${i}(${w}kg/${v}元)：不选=${skip}元，选=${take}元 → ${dp[i][j]}元`
+          highlight: { row: i, col: j + 1, fromA, fromB },
+          items: itemsArray, currentItem: i,
+          description: `物品${i}(重${w}kg,值${v}元)：不选得 ${skip}元，放入得 ${v}+${dp[i-1][j-w]}=${take}元 → ${chosen}，取 ${dp[i][j]}元`
         });
       }
     }
@@ -1416,8 +1427,9 @@ function knapsack01(config) {
     type: 'table',
     headers: ['物品\\容量', ...Array.from({ length: capacity + 1 }, (_, k) => String(k))],
     rows: buildTableRows(dp, n, n + 1),
-    highlight: { row: n, col: capacity + 1 },
-    description: `最大价值 = ${dp[n][capacity]} 元`
+    highlight: { row: n, col: capacity + 1, fromA: null, fromB: null },
+    items: itemsArray, currentItem: n + 1,
+    description: `✅ 最优解：装入背包的最大价值 = ${dp[n][capacity]} 元`
   });
 
   return { snapshots, result: dp[n][capacity] };

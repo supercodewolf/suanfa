@@ -420,25 +420,85 @@ class Visualizer {
    * 绘制 DP 表格快照（背包问题）
    */
   drawTableSnapshot(snapshot) {
-    const { headers, rows, highlight } = snapshot;
+    const { headers, rows, highlight, items, currentItem } = snapshot;
     const ctx = this.ctx;
     const w = this.width;
     const h = this.height;
 
-    const padding = { top: 20, right: 20, bottom: 70, left: 20 };
+    const itemAreaH = items ? 50 : 0;
+    const padding = { top: itemAreaH + 10, right: 20, bottom: 70, left: 20 };
     const cols = headers.length;
     const visibleRows = rows.filter(r => r.length > 0);
-    const visibleRowCount = Math.max(visibleRows.length, 1);
     const cellW = Math.min(48, (w - padding.left - padding.right) / cols);
-    const cellH = 24;
+    const cellH = 22;
     const totalW = cellW * cols;
     const offsetX = padding.left + (w - padding.left - padding.right - totalW) / 2;
     const offsetY = padding.top + 10;
 
+    // 绘制物品展示栏
+    if (items) {
+      const itemW = Math.min(90, (w - 40) / items.length - 8);
+      const startX = w / 2 - (items.length * (itemW + 8)) / 2;
+      for (let i = 0; i < items.length; i++) {
+        const ix = startX + i * (itemW + 8);
+        const isCurrent = currentItem === i + 1;
+
+        ctx.fillStyle = isCurrent ? '#E74C3C' : '#4A90D9';
+        this.roundRect(ix, 8, itemW, 36, 6);
+        ctx.fill();
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(items[i].name, ix + itemW / 2, 16);
+        ctx.font = '9px sans-serif';
+        ctx.fillText(`${items[i].weight}kg/${items[i].value}元`, ix + itemW / 2, 33);
+
+        if (isCurrent) {
+          // 红色边框 + 箭头
+          ctx.strokeStyle = '#E74C3C';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          // 小箭头指向表格
+          ctx.fillStyle = '#E74C3C';
+          ctx.fillText('▼', ix + itemW / 2, 48);
+        }
+      }
+    }
+
+    // 绘制关联高亮（fromA / fromB 的数据源格子）
+    const highlightCells = [];
+    if (highlight) {
+      if (highlight.fromA) highlightCells.push({ ...highlight.fromA, color: '#3498DB', type: 'skip' });
+      if (highlight.fromB) highlightCells.push({ ...highlight.fromB, color: '#F39C12', type: 'take' });
+      highlightCells.push({ row: highlight.row, col: highlight.col, color: '#E74C3C', type: 'current' });
+    }
+
+    // 先画来源格子的半透明背景
+    for (const hc of highlightCells) {
+      if (hc.type === 'current') continue;
+      const sr = hc.row, sc = hc.col;
+      if (sr < visibleRows.length && sc < cols) {
+        const hx = offsetX + sc * cellW;
+        const hy = offsetY + cellH + sr * cellH;
+        ctx.fillStyle = hc.color === '#3498DB' ? 'rgba(52,152,219,0.25)' : 'rgba(243,156,18,0.25)';
+        ctx.fillRect(hx, hy, cellW, cellH);
+        // 小标签
+        ctx.fillStyle = hc.color;
+        ctx.font = '7px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(hc.label, hx + cellW / 2, hy - 1);
+      }
+    }
+
     // 表头
+    ctx.fillStyle = '#34495E';
+    ctx.fillRect(offsetX, offsetY, totalW, cellH);
     for (let c = 0; c < cols; c++) {
       const x = offsetX + c * cellW;
-      ctx.fillStyle = '#2C3E50';
+      ctx.fillStyle = '#FFFFFF';
       ctx.font = '10px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -448,22 +508,74 @@ class Visualizer {
     // 数据行
     for (let r = 0; r < visibleRows.length; r++) {
       const row = visibleRows[r];
+      const isCurrentRow = highlight && highlight.row === r;
+      const baseY = offsetY + cellH + r * cellH;
+
+      // 当前行背景
+      if (isCurrentRow) {
+        ctx.fillStyle = 'rgba(231,76,60,0.06)';
+        ctx.fillRect(offsetX, baseY, totalW, cellH);
+      }
+
       for (let c = 0; c < cols; c++) {
         const x = offsetX + c * cellW;
-        const y = offsetY + cellH + r * cellH;
-        const isHighlight = highlight && highlight.row === r && highlight.col === c;
+        const y = baseY;
 
-        ctx.fillStyle = isHighlight ? '#E74C3C' : (r % 2 === 0 ? '#FFFFFF' : '#F0F2F5');
-        ctx.fillRect(x, y, cellW, cellH);
-        ctx.strokeStyle = '#E0E0E0';
+        // 判断此格子的高亮类型
+        let cellHighlight = null;
+        for (const hc of highlightCells) {
+          if (hc.row === r && hc.col === c) { cellHighlight = hc; break; }
+        }
+
+        if (cellHighlight) {
+          ctx.fillStyle = cellHighlight.color;
+          if (cellHighlight.type !== 'current') {
+            // 来源格用半透明
+            ctx.globalAlpha = 0.5;
+            ctx.fillStyle = cellHighlight.color;
+            ctx.fillRect(x, y, cellW, cellH);
+            ctx.globalAlpha = 1;
+          } else {
+            ctx.fillRect(x, y, cellW, cellH);
+          }
+        } else if (r % 2 === 0) {
+          ctx.fillStyle = '#F8F9FA';
+          ctx.fillRect(x, y, cellW, cellH);
+        } else {
+          ctx.fillRect(x, y, cellW, cellH);
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(x, y, cellW, cellH);
+        }
+
+        ctx.strokeStyle = '#E8E8E8';
+        ctx.lineWidth = 0.5;
         ctx.strokeRect(x, y, cellW, cellH);
 
-        ctx.fillStyle = isHighlight ? '#FFFFFF' : '#2C3E50';
-        ctx.font = `${isHighlight ? 'bold ' : ''}10px sans-serif`;
+        ctx.fillStyle = cellHighlight && cellHighlight.type === 'current' ? '#FFFFFF' : '#2C3E50';
+        ctx.font = `${cellHighlight && cellHighlight.type === 'current' ? 'bold ' : ''}10px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(row[c] || '', x + cellW / 2, y + cellH / 2);
       }
+    }
+
+    // 图例
+    const legendY = offsetY + cellH + visibleRows.length * cellH + 8;
+    const legendItems = [
+      { color: '#E74C3C', label: '当前格' },
+      { color: '#3498DB', label: '不选来源' },
+      { color: '#F39C12', label: '放入来源' }
+    ];
+    const legendStart = offsetX;
+    for (let i = 0; i < legendItems.length; i++) {
+      const lx = legendStart + i * 90;
+      ctx.fillStyle = legendItems[i].color;
+      ctx.fillRect(lx, legendY, 10, 10);
+      ctx.fillStyle = '#7F8C8D';
+      ctx.font = '9px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(legendItems[i].label, lx + 14, legendY + 5);
     }
   }
 

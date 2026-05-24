@@ -718,7 +718,7 @@ function countingSort(arr) {
   }
 
   // 放置元素（反向遍历保证稳定性）
-  const output = new Array(n);
+  const output = new Array(n).fill(0);  // 用 0 填充避免 undefined 导致 visualizer 报错
   for (let i = n - 1; i >= 0; i--) {
     const idx = count[array[i] - min] - 1;
     output[idx] = array[i];
@@ -864,7 +864,7 @@ function sieveOfEratosthenes(N) {
 
   snapshots.push(snapshot(
     [...displayArr], [], [], [],
-    `列出 2 到 ${N} 的所有整数`
+    `列出 2 到 ${N} 的所有素数`
   ));
 
   for (let p = 2; p * p <= N; p++) {

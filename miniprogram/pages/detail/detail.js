@@ -5,6 +5,7 @@ const { Visualizer } = require('../../utils/visualizer');
 Page({
   data: {
     algorithm: {},
+    showLock: false,          // 是否显示解锁遮罩
     currentStep: 0,
     totalSteps: 0,
     progressPercent: 0,
@@ -18,6 +19,7 @@ Page({
   visualizer: null,
   timer: null,
   algoId: '',
+  rewardedVideoAd: null,
 
   onLoad(options) {
     const { id } = options;
@@ -33,15 +35,124 @@ Page({
     wx.setNavigationBarTitle({ title: algorithm.name });
     this.setData({ algorithm });
     this.algoId = id;
+
+    // 进阶算法：检查是否已解锁
+    if (algorithm.difficulty === '进阶') {
+      const unlocked = wx.getStorageSync('unlocked_algorithms') || {};
+      if (!unlocked[id]) {
+        this.setData({ showLock: true });
+        this.createRewardedVideoAd();
+        return; // 不初始化 canvas，等解锁后再初始化
+      }
+    }
   },
 
   onReady() {
-    // 页面首次渲染完成后，canvas 才有真实的 CSS 尺寸
-    this.initCanvas();
+    if (!this.data.showLock) {
+      this.initCanvas();
+    }
   },
 
   onUnload() {
     this.stopPlay();
+    if (this.rewardedVideoAd) {
+      this.rewardedVideoAd.destroy();
+    }
+  },
+
+  // ==================== 解锁逻辑 ====================
+
+  createRewardedVideoAd() {
+    // 测试广告位 ID：调试时可正常展示测试广告，上线后替换为真实 ID
+    const adUnitId = 'adunit-927b5e04bd215e40';
+
+    // 尝试创建激励视频广告（开发工具中可能不支持，但真机上可用）
+    try {
+      this.rewardedVideoAd = wx.createRewardedVideoAd({ adUnitId });
+
+      this.rewardedVideoAd.onLoad(() => {
+        console.log('激励视频广告加载成功');
+      });
+
+      this.rewardedVideoAd.onError((err) => {
+        console.log('激励视频广告加载失败:', err);
+        // 广告加载失败时，开发模式下直接解锁
+        wx.showModal({
+          title: '提示',
+          content: '广告暂未准备好（开发/调试模式下正常现象），是否直接解锁？',
+          success: (res) => {
+            if (res.confirm) {
+              this.doUnlock();
+            }
+          }
+        });
+      });
+
+      this.rewardedVideoAd.onClose((res) => {
+        if (res && res.isEnded) {
+          // 用户完整观看了广告 → 解锁
+          this.doUnlock();
+        } else {
+          wx.showToast({ title: '需看完广告才能解锁哦', icon: 'none' });
+        }
+      });
+    } catch (e) {
+      // 开发工具中 createRewardedVideoAd 可能不可用，降级处理
+      console.log('当前环境不支持激励视频，开发模式下直接解锁');
+      wx.showModal({
+        title: '开发模式',
+        content: '当前环境暂不支持广告，直接解锁此算法。',
+        showCancel: false,
+        success: () => {
+          this.doUnlock();
+        }
+      });
+    }
+  },
+
+  unlockByAd() {
+    if (this.rewardedVideoAd) {
+      this.rewardedVideoAd.show().catch((err) => {
+        console.log('广告展示失败:', err);
+        // 展示失败时尝试重新加载
+        this.rewardedVideoAd.load().then(() => {
+          return this.rewardedVideoAd.show();
+        }).catch(() => {
+          wx.showModal({
+            title: '提示',
+            content: '广告暂时无法播放，是否直接解锁？',
+            success: (res) => {
+              if (res.confirm) {
+                this.doUnlock();
+              }
+            }
+          });
+        });
+      });
+    } else {
+      this.doUnlock();
+    }
+  },
+
+  doUnlock() {
+    // 记录解锁状态到本地存储
+    const unlocked = wx.getStorageSync('unlocked_algorithms') || {};
+    unlocked[this.algoId] = true;
+    wx.setStorageSync('unlocked_algorithms', unlocked);
+
+    this.setData({ showLock: false });
+    wx.showToast({ title: '已解锁！', icon: 'success', duration: 1200 });
+
+    // 初始化 canvas 并运行算法
+    this.initCanvas();
+  },
+
+  goBack() {
+    wx.navigateBack();
+  },
+
+  preventTap() {
+    // 阻止点击穿透遮罩层
   },
 
   // ==================== Canvas 初始化 ====================
@@ -51,8 +162,8 @@ Page({
     query.select('#vizCanvas').boundingClientRect();
     query.select('#vizCanvas').fields({ node: true });
     query.exec((res) => {
-      const rect = res[0];   // boundingClientRect 结果
-      const node = res[1];   // fields 结果
+      const rect = res[0];
+      const node = res[1];
       if (!rect || !rect.width || !node || !node.node) {
         console.error('Canvas 初始化失败', res);
         wx.showToast({ title: 'Canvas 加载失败', icon: 'error' });
@@ -236,14 +347,14 @@ Page({
       .exec();
   },
 
-  // ==================== 广告回调（开通流量主后自动生效） ====================
+  // ==================== 广告回调 ====================
 
   onAdLoad() {
-    // 广告加载成功（开通流量主前不会触发）
+    // Banner 广告加载成功
   },
 
   onAdError(err) {
-    // 广告加载失败（未开通流量主时静默忽略，不发版即可生效）
-    console.log('广告未加载（流量主未开通或网络问题）:', err.detail.errMsg);
+    // Banner 广告加载失败（未开通流量主时静默忽略）
+    console.log('Banner广告未加载:', err.detail.errMsg);
   }
 });

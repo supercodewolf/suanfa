@@ -1,10 +1,27 @@
 <!--详情页 - Canvas 可视化 + 控制面板-->
 <view class="container">
+  <!-- 解锁遮罩层（进阶算法未解锁时显示） -->
+  <view class="lock-overlay" wx:if="{{showLock}}" bindtap="preventTap">
+    <view class="lock-box">
+      <text class="lock-icon">🔒</text>
+      <text class="lock-title">进阶算法</text>
+      <text class="lock-desc">观看 15 秒小广告\n即可免费解锁学习</text>
+      <view class="lock-btn" bindtap="unlockByAd">
+        <text>📺 观看广告解锁</text>
+      </view>
+      <view class="lock-close" bindtap="goBack">
+        <text>返回</text>
+      </view>
+    </view>
+  </view>
+
   <!-- 顶部算法信息 -->
   <view class="info-bar">
     <view class="info-left">
       <text class="info-name">{{algorithm.name}}</text>
       <text class="info-difficulty {{algorithm.difficulty === '入门' ? 'diff-easy' : algorithm.difficulty === '进阶' ? 'diff-medium' : 'diff-hard'}}">{{algorithm.difficulty}}</text>
+      <!-- 已解锁标记 -->
+      <text wx:if="{{algorithm.difficulty === '进阶' && !showLock}}" class="unlocked-badge">✅ 已解锁</text>
     </view>
     <view class="info-right">
       <text class="info-complexity">{{algorithm.timeComplexity}}</text>
@@ -88,8 +105,8 @@
     </view>
   </view>
 
-  <!-- 广告位（开通流量主后自动展示） -->
-  <ad unit-id="adunit-banner-detail" ad-type="banner" bindload="onAdLoad" binderror="onAdError"></ad>
+  <!-- 广告位（调试用测试ID，上线后替换为真实ID） -->
+  <ad unit-id="adunit-7fca7715e8e1c92f" ad-type="banner" bindload="onAdLoad" binderror="onAdError"></ad>
 
   <!-- 底部间距 -->
   <view style="height: 40rpx;"></view>

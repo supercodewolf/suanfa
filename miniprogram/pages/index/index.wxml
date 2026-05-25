@@ -1,62 +1,48 @@
-<!--首页 - 算法分类与列表-->
-<view class="container">
+<!--首页 - 算法分类与列表（WeUI 风格）-->
+<view class="page">
   <!-- 顶部标题 -->
-  <view class="header">
-    <text class="header-icon">🧠</text>
-    <text class="header-title">算法可视化学习</text>
-    <text class="header-subtitle">通过动画直观理解算法原理</text>
+  <view class="page__hd">
+    <view class="page__title">🧠 算法可视化学习</view>
+    <view class="page__desc">通过动画直观理解算法原理 · 共 28 个算法</view>
   </view>
 
   <!-- 分类卡片列表 -->
-  <view class="category-list">
-    <view
-      class="category-card"
-      wx:for="{{categories}}"
-      wx:key="id"
-      style="--card-color: {{item.color}}"
-    >
+  <view class="page__bd">
+    <view class="weui-panel weui-panel_access" wx:for="{{categories}}" wx:key="id">
       <!-- 分类标题栏 -->
-      <view class="category-header" bindtap="toggleCategory" data-id="{{item.id}}">
-        <view class="category-title-row">
-          <text class="category-icon">{{item.icon}}</text>
-          <text class="category-name">{{item.name}}</text>
-          <text class="category-count">{{item.algorithms.length}}个</text>
+      <view class="weui-panel__hd" bindtap="toggleCategory" data-id="{{item.id}}" style="border-left: 6rpx solid {{item.color}};">
+        <view style="display:flex;align-items:center;justify-content:space-between;padding:24rpx 30rpx;">
+          <view style="display:flex;align-items:center;gap:16rpx;">
+            <text style="font-size:36rpx;">{{item.icon}}</text>
+            <text style="font-size:30rpx;font-weight:600;color:#2C3E50;">{{item.name}}</text>
+            <text class="weui-badge" style="background:{{item.color}};margin-left:8rpx;">{{item.algorithms.length}}</text>
+          </view>
+          <text class="arrow-icon {{item.expanded ? 'rotated' : ''}}" style="color:#BDC3C7;font-size:28rpx;">▾</text>
         </view>
-        <text class="arrow {{item.expanded ? 'expanded' : ''}}">▾</text>
       </view>
 
-      <!-- 算法列表（展开时显示） -->
-      <view class="algo-list {{item.expanded ? 'expanded' : ''}}">
-        <view
-          class="algo-item"
-          wx:for="{{item.algorithms}}"
-          wx:for-item="algo"
-          wx:key="id"
-          bindtap="goDetail"
-          data-id="{{algo.id}}"
-        >
-          <!-- 左侧信息 -->
-          <view class="algo-info">
-            <text class="algo-name">{{algo.name}}</text>
-            <view class="algo-meta">
-              <text class="algo-tag {{algo.difficulty === '入门' ? 'tag-easy' : algo.difficulty === '进阶' ? 'tag-medium' : 'tag-hard'}}">{{algo.difficulty}}</text>
-              <text class="algo-complexity">{{algo.timeComplexity}}</text>
+      <!-- 算法列表 -->
+      <view wx:if="{{item.expanded}}" class="weui-panel__bd">
+        <view class="weui-media-box weui-media-box_appmsg" wx:for="{{item.algorithms}}" wx:for-item="algo" wx:key="id" bindtap="goDetail" data-id="{{algo.id}}">
+          <view class="weui-media-box__hd" style="width:50rpx;height:50rpx;border-radius:12rpx;background:{{item.color}};display:flex;align-items:center;justify-content:center;margin-right:20rpx;">
+            <text style="color:#fff;font-size:24rpx;font-weight:700;">{{algo.name[0]}}</text>
+          </view>
+          <view class="weui-media-box__bd">
+            <view class="weui-media-box__title" style="font-size:28rpx;">{{algo.name}}</view>
+            <view class="weui-media-box__desc" style="font-size:22rpx;display:flex;align-items:center;gap:12rpx;">
+              <text style="color:{{algo.difficulty === '入门' ? '#27AE60' : '#E67E22'}};font-weight:500;">{{algo.difficulty}}</text>
+              <text style="color:#BDC3C7;">{{algo.timeComplexity}}</text>
             </view>
           </view>
-          <!-- 右侧箭头 -->
-          <view class="algo-arrow-wrap">
-            <view class="algo-preview-bar" style="background: {{item.color}}">
-              <view wx:for="{{[1,2,3,4,5]}}" wx:key="*this" class="mini-bar" style="height: {{30 + index * 15}}rpx"></view>
-            </view>
-            <text class="arrow-right">›</text>
+          <view class="weui-media-box__ft">
+            <text style="color:#C7C7CC;font-size:32rpx;">›</text>
           </view>
         </view>
       </view>
     </view>
   </view>
 
-  <!-- 底部提示 -->
-  <view class="footer-tip">
-    <text>💡 点击算法名称即可进入可视化演示</text>
+  <view class="page__ft">
+    <text style="color:#BDC3C7;font-size:24rpx;">点击算法名称进入可视化演示</text>
   </view>
 </view>

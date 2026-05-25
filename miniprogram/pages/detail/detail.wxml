@@ -33,26 +33,11 @@
 
     <!-- 按钮组 -->
     <view class="btn-group">
-      <view class="control-btn" bindtap="reset">
-        <text class="btn-icon">⏮</text>
-        <text class="btn-label">重置</text>
-      </view>
-      <view class="control-btn" bindtap="stepBackward">
-        <text class="btn-icon">◀</text>
-        <text class="btn-label">上一步</text>
-      </view>
-      <view class="control-btn primary-btn {{isPlaying ? 'playing' : ''}}" bindtap="togglePlay">
-        <text class="btn-icon">{{isPlaying ? '⏸' : '▶'}}</text>
-        <text class="btn-label">{{isPlaying ? '暂停' : '播放'}}</text>
-      </view>
-      <view class="control-btn" bindtap="stepForward">
-        <text class="btn-icon">▶</text>
-        <text class="btn-label">下一步</text>
-      </view>
-      <view class="control-btn" bindtap="setSpeed">
-        <text class="btn-icon">🐢</text>
-        <text class="btn-label">{{speed}}x</text>
-      </view>
+      <button class="weui-btn weui-btn_mini weui-btn_default" bindtap="reset">⏮ 重置</button>
+      <button class="weui-btn weui-btn_mini weui-btn_default" bindtap="stepBackward">◀ 上一步</button>
+      <button class="weui-btn weui-btn_mini {{isPlaying ? 'weui-btn_warn' : 'weui-btn_primary'}}" bindtap="togglePlay">{{isPlaying ? '⏸ 暂停' : '▶ 播放'}}</button>
+      <button class="weui-btn weui-btn_mini weui-btn_default" bindtap="stepForward">下一步 ▶</button>
+      <button class="weui-btn weui-btn_mini weui-btn_default" bindtap="setSpeed">🐢 {{speed}}x</button>
     </view>
   </view>
 

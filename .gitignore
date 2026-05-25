@@ -14,3 +14,6 @@ Thumbs.db
 
 # 日志
 *.log
+
+# npm
+miniprogram/package-lock.json

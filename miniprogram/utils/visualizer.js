@@ -10,23 +10,23 @@ class Visualizer {
     this.height = height;
     this.dpr = 2; // 设备像素比，用于高清屏适配
 
-    // 颜色定义 — 橙黄色系
+    // 颜色定义 — 数据可视化配色（不受页面橙黄色系影响）
     this.colors = {
-      default: '#E67E22',     // 橙色 - 默认
+      default: '#4A90D9',     // 蓝色 - 默认
       comparing: '#F5A623',   // 金黄 - 正在比较
       swapping: '#E74C3C',    // 红色 - 正在交换/操作
       sorted: '#27AE60',      // 绿色 - 已排序/已找到
-      pivot: '#D35400',       // 深橙 - 基准元素
-      range: '#F0A030',       // 琥珀 - 搜索范围
-      text: '#3E2723',        // 深棕 - 文字
-      desc: '#8D6E63',        // 暖灰 - 描述
+      pivot: '#9B59B6',       // 紫色 - 基准元素
+      range: '#E67E22',       // 橙色 - 搜索范围
+      text: '#2C3E50',        // 深色 - 文字
+      desc: '#7F8C8D',        // 灰色 - 描述
       bg: '#FFFFFF',          // 背景
-      barBg: '#5D4037',       // 棕色 - 柱子文字
-      found: '#27AE60',       // 绿色 - 查找结果
-      wall: '#3E2723',        // 深棕 - 迷宫墙
-      path: '#F1C40F',        // 金黄 - 迷宫路径
-      visited: '#E0D5C1',     // 暖灰 - 已访问
-      empty: '#FFF3E0'        // 浅橙 - 空地
+      barBg: '#34495E',       // 柱子文字
+      found: '#27AE60',       // 查找结果
+      wall: '#2C3E50',        // 迷宫墙
+      path: '#F1C40F',        // 迷宫路径
+      visited: '#BDC3C7',     // 已访问
+      empty: '#ECF0F1'        // 空地
     };
   }
 
@@ -129,7 +129,7 @@ class Visualizer {
       ctx.fillText(val, x + barWidth / 2, y - 4);
 
       // 底部索引
-      ctx.fillStyle = '#BF9B7A';
+      ctx.fillStyle = '#95A5A6';
       ctx.font = '10px sans-serif';
       ctx.textBaseline = 'top';
       ctx.fillText(i, x + barWidth / 2, padding.top + chartHeight + 6);
@@ -179,11 +179,11 @@ class Visualizer {
         ctx.fillStyle = '#27AE60';
         ctx.strokeStyle = '#1E8449';
       } else if (isTop) {
-        ctx.fillStyle = '#E67E22';
+        ctx.fillStyle = '#4A90D9';
         ctx.strokeStyle = '#D35400';
       } else {
-        ctx.fillStyle = '#FFF3E0';
-        ctx.strokeStyle = '#E0D5C1';
+        ctx.fillStyle = '#ECF0F1';
+        ctx.strokeStyle = '#BDC3C7';
       }
       ctx.lineWidth = 2;
       ctx.fill();
@@ -191,7 +191,7 @@ class Visualizer {
 
       // 文字
       const realIdx = array.length > maxVisible ? array.length - maxVisible + i : i;
-      ctx.fillStyle = (isTop || isHighlight) ? '#FFFFFF' : '#3E2723';
+      ctx.fillStyle = (isTop || isHighlight) ? '#FFFFFF' : '#2C3E50';
       ctx.font = 'bold 16px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -200,7 +200,7 @@ class Visualizer {
 
     // 显示隐藏的元素数量
     if (array.length > maxVisible) {
-      ctx.fillStyle = '#BF9B7A';
+      ctx.fillStyle = '#95A5A6';
       ctx.font = '12px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
@@ -245,7 +245,7 @@ class Visualizer {
 
     // 箭头
     if (displayArr.length > 0) {
-      ctx.fillStyle = '#E0D5C1';
+      ctx.fillStyle = '#BDC3C7';
       ctx.font = '18px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
@@ -271,20 +271,20 @@ class Visualizer {
         ctx.fillStyle = '#E74C3C';
         ctx.strokeStyle = '#C0392B';
       } else if (isFront) {
-        ctx.fillStyle = '#E8833A';
+        ctx.fillStyle = '#4A90D9';
         ctx.strokeStyle = '#D35400';
       } else if (isRear) {
-        ctx.fillStyle = '#E67E22';
+        ctx.fillStyle = '#4A90D9';
         ctx.strokeStyle = '#D35400';
       } else {
-        ctx.fillStyle = '#FFF3E0';
-        ctx.strokeStyle = '#E0D5C1';
+        ctx.fillStyle = '#ECF0F1';
+        ctx.strokeStyle = '#BDC3C7';
       }
       ctx.lineWidth = 2;
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = (isFront || isRear || isHighlight) ? '#FFFFFF' : '#3E2723';
+      ctx.fillStyle = (isFront || isRear || isHighlight) ? '#FFFFFF' : '#2C3E50';
       ctx.font = 'bold 16px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -293,7 +293,7 @@ class Visualizer {
 
     // 隐藏元素提示
     if (array.length > maxVisible) {
-      ctx.fillStyle = '#BF9B7A';
+      ctx.fillStyle = '#95A5A6';
       ctx.font = '12px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
@@ -335,7 +335,7 @@ class Visualizer {
         } else if (pathSet.has(key)) {
           ctx.fillStyle = this.colors.path;  // 路径：金色
         } else if (newSet.has(key)) {
-          ctx.fillStyle = '#F0A030';  // 新发现：蓝色
+          ctx.fillStyle = '#3498DB';  // 新发现：蓝色
         } else if (visitedSet.has(key)) {
           ctx.fillStyle = this.colors.visited;  // 已访问：灰色
         } else if (grid[r][c] === 1) {
@@ -373,7 +373,7 @@ class Visualizer {
     const startX = w / 2 - totalW / 2;
 
     // 标签
-    ctx.fillStyle = '#3E2723';
+    ctx.fillStyle = '#2C3E50';
     ctx.font = 'bold 16px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
@@ -382,7 +382,7 @@ class Visualizer {
 
     // 变量 a
     this.roundRect(startX, centerY - boxH / 2, boxW, boxH, 12);
-    ctx.fillStyle = highlightA ? '#E74C3C' : '#E67E22';
+    ctx.fillStyle = highlightA ? '#E74C3C' : '#4A90D9';
     ctx.lineWidth = 3;
     ctx.strokeStyle = highlightA ? '#C0392B' : '#D35400';
     ctx.fill();
@@ -394,7 +394,7 @@ class Visualizer {
     ctx.fillText(a || 0, startX + boxW / 2, centerY);
 
     // 等号/箭头
-    ctx.fillStyle = '#8D6E63';
+    ctx.fillStyle = '#7F8C8D';
     ctx.font = '24px sans-serif';
     ctx.fillText('?', startX + boxW + gap / 2, centerY);
 
@@ -409,7 +409,7 @@ class Visualizer {
     ctx.fillText(b || 0, startX + boxW + gap + boxW / 2, centerY);
 
     // 标签 "a" / "b"
-    ctx.fillStyle = '#BF9B7A';
+    ctx.fillStyle = '#95A5A6';
     ctx.font = '12px sans-serif';
     ctx.textBaseline = 'bottom';
     ctx.fillText('a', startX + boxW - 10, centerY - boxH / 2 - 2);
@@ -443,7 +443,7 @@ class Visualizer {
         const ix = startX + i * (itemW + 8);
         const isCurrent = currentItem === i + 1;
 
-        ctx.fillStyle = isCurrent ? '#E74C3C' : '#E67E22';
+        ctx.fillStyle = isCurrent ? '#E74C3C' : '#4A90D9';
         this.roundRect(ix, 8, itemW, 36, 6);
         ctx.fill();
         ctx.fillStyle = '#FFFFFF';
@@ -470,7 +470,7 @@ class Visualizer {
     // 绘制关联高亮（fromA / fromB 的数据源格子）
     const highlightCells = [];
     if (highlight) {
-      if (highlight.fromA) highlightCells.push({ ...highlight.fromA, color: '#E8833A', type: 'skip' });
+      if (highlight.fromA) highlightCells.push({ ...highlight.fromA, color: '#4A90D9', type: 'skip' });
       if (highlight.fromB) highlightCells.push({ ...highlight.fromB, color: '#27AE60', type: 'take' });
       highlightCells.push({ row: highlight.row, col: highlight.col, color: '#E74C3C', type: 'current' });
     }
@@ -482,7 +482,7 @@ class Visualizer {
       if (sr < visibleRows.length && sc < cols) {
         const hx = offsetX + sc * cellW;
         const hy = offsetY + cellH + sr * cellH;
-        ctx.fillStyle = hc.color === '#F0A030' ? 'rgba(232,131,58,0.25)' : 'rgba(243,156,18,0.25)';
+        ctx.fillStyle = hc.color === '#3498DB' ? 'rgba(52,152,219,0.25)' : 'rgba(243,156,18,0.25)';
         ctx.fillRect(hx, hy, cellW, cellH);
         // 小标签
         ctx.fillStyle = hc.color;
@@ -539,7 +539,7 @@ class Visualizer {
             ctx.fillRect(x, y, cellW, cellH);
           }
         } else if (r % 2 === 0) {
-          ctx.fillStyle = '#FFF3E0';
+          ctx.fillStyle = '#ECF0F1';
           ctx.fillRect(x, y, cellW, cellH);
         } else {
           ctx.fillRect(x, y, cellW, cellH);
@@ -547,11 +547,11 @@ class Visualizer {
           ctx.fillRect(x, y, cellW, cellH);
         }
 
-        ctx.strokeStyle = '#E0D5C1';
+        ctx.strokeStyle = '#BDC3C7';
         ctx.lineWidth = 0.5;
         ctx.strokeRect(x, y, cellW, cellH);
 
-        ctx.fillStyle = cellHighlight && cellHighlight.type === 'current' ? '#FFFFFF' : '#3E2723';
+        ctx.fillStyle = cellHighlight && cellHighlight.type === 'current' ? '#FFFFFF' : '#2C3E50';
         ctx.font = `${cellHighlight && cellHighlight.type === 'current' ? 'bold ' : ''}10px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -563,7 +563,7 @@ class Visualizer {
     const legendY = offsetY + cellH + visibleRows.length * cellH + 8;
     const legendItems = [
       { color: '#E74C3C', label: '当前格' },
-      { color: '#E8833A', label: '不选来源' },
+      { color: '#4A90D9', label: '不选来源' },
       { color: '#27AE60', label: '放入来源' }
     ];
     const legendStart = offsetX;
@@ -571,7 +571,7 @@ class Visualizer {
       const lx = legendStart + i * 90;
       ctx.fillStyle = legendItems[i].color;
       ctx.fillRect(lx, legendY, 10, 10);
-      ctx.fillStyle = '#8D6E63';
+      ctx.fillStyle = '#7F8C8D';
       ctx.font = '9px sans-serif';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
@@ -589,7 +589,7 @@ class Visualizer {
     const h = this.height;
 
     // 顶部公式
-    ctx.fillStyle = '#3E2723';
+    ctx.fillStyle = '#2C3E50';
     ctx.font = 'bold 20px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
@@ -602,7 +602,7 @@ class Visualizer {
       ctx.fillText(`= ${result}`, w / 2, 38);
       ctx.textBaseline = 'middle';
     } else {
-      ctx.fillStyle = '#BF9B7A';
+      ctx.fillStyle = '#95A5A6';
       ctx.font = '13px sans-serif';
       ctx.textBaseline = 'top';
       ctx.fillText('正在转化中...', w / 2, 36);
@@ -614,8 +614,8 @@ class Visualizer {
     const startX = w / 2 - totalW / 2;
 
     const boxDefs = [
-      { label: '底数 base',  value: base,   color: '#E67E22', prev: prevBase,  change: base !== prevBase },
-      { label: '指数 exp',  value: exp,     color: '#E67E22', prev: prevExp,   change: exp !== prevExp },
+      { label: '底数 base',  value: base,   color: '#4A90D9', prev: prevBase,  change: base !== prevBase },
+      { label: '指数 exp',  value: exp,     color: '#4A90D9', prev: prevExp,   change: exp !== prevExp },
       { label: '结果 result', value: result, color: '#27AE60', prev: prevResult, change: result !== prevResult }
     ];
 
@@ -633,7 +633,7 @@ class Visualizer {
       }
 
       // 标签
-      ctx.fillStyle = '#BF9B7A';
+      ctx.fillStyle = '#95A5A6';
       ctx.font = '10px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
@@ -670,9 +670,9 @@ class Visualizer {
 
     // 操作指示条
     const opColors = {
-      init: { bg: '#8D6E63', text: '开始', icon: '▶' },
+      init: { bg: '#7F8C8D', text: '开始', icon: '▶' },
       odd_mult: { bg: '#E74C3C', text: '指数是奇数 → result × base', icon: '✕' },
-      square_halve: { bg: '#F0A030', text: '底数平方 + 指数折半', icon: '²' },
+      square_halve: { bg: '#3498DB', text: '底数平方 + 指数折半', icon: '²' },
       done_halve: { bg: '#27AE60', text: '底数平方 + 指数归零 → 得出答案', icon: '✓' },
       done: { bg: '#27AE60', text: '计算完成', icon: '★' }
     };
@@ -698,7 +698,7 @@ class Visualizer {
   drawDescription(text) {
     if (!text) return;
     const ctx = this.ctx;
-    ctx.fillStyle = '#3E2723';
+    ctx.fillStyle = '#2C3E50';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
 

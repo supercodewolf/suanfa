@@ -11,7 +11,7 @@
 .page__title {
   font-size: 40rpx;
   font-weight: 700;
-  color: #2C3E50;
+  color: #3E2723;
 }
 
 .page__desc {

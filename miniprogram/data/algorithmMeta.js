@@ -278,42 +278,42 @@ const categories = [
     id: 'sorting',
     name: '排序算法',
     icon: '📊',
-    color: '#4A90D9',
+    color: '#E67E22',
     algorithms: algorithms.sorting
   },
   {
     id: 'searching',
     name: '搜索算法',
     icon: '🔍',
-    color: '#27AE60',
+    color: '#F39C12',
     algorithms: algorithms.searching
   },
   {
     id: 'graph',
     name: '图算法',
     icon: '🗺️',
-    color: '#9B59B6',
+    color: '#D35400',
     algorithms: algorithms.graph
   },
   {
     id: 'structures',
     name: '数据结构演示',
     icon: '🏗️',
-    color: '#E67E22',
+    color: '#F0A030',
     algorithms: algorithms.structures
   },
   {
     id: 'dp',
     name: '动态规划',
     icon: '🧮',
-    color: '#3498DB',
+    color: '#E8833A',
     algorithms: algorithms.dp
   },
   {
     id: 'math',
     name: '数学算法',
     icon: '🔢',
-    color: '#1ABC9C',
+    color: '#C0873A',
     algorithms: algorithms.math
   }
 ];

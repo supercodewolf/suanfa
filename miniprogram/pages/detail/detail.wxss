@@ -1,7 +1,7 @@
 /* 详情页样式 */
 
 page {
-  background: #F0F2F5;
+  background: #FFF8F0;
 }
 
 .container {
@@ -31,7 +31,7 @@ page {
 .info-name {
   font-size: 32rpx;
   font-weight: 700;
-  color: #2C3E50;
+  color: #3E2723;
 }
 
 .info-difficulty {
@@ -97,7 +97,7 @@ page {
 .progress-bar {
   flex: 1;
   height: 10rpx;
-  background: #ECF0F1;
+  background: #F5E6D3;
   border-radius: 5rpx;
   position: relative;
   overflow: visible;
@@ -105,7 +105,7 @@ page {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4A90D9, #5B9FE0);
+  background: linear-gradient(90deg, #E67E22, #F39C12);
   border-radius: 5rpx;
   transition: width 0.15s ease;
 }
@@ -117,9 +117,9 @@ page {
   width: 24rpx;
   height: 24rpx;
   background: #FFFFFF;
-  border: 3rpx solid #4A90D9;
+  border: 3rpx solid #E67E22;
   border-radius: 50%;
-  box-shadow: 0 2rpx 8rpx rgba(74, 144, 217, 0.3);
+  box-shadow: 0 2rpx 8rpx rgba(230, 126, 34, 0.3);
   transition: left 0.15s ease;
 }
 
@@ -171,20 +171,20 @@ page {
 .card-title {
   font-size: 30rpx;
   font-weight: 700;
-  color: #2C3E50;
+  color: #3E2723;
   margin-bottom: 16rpx;
 }
 
 .card-desc {
   font-size: 26rpx;
-  color: #5D6D7E;
+  color: #8D6E63;
   line-height: 1.8;
   display: block;
   margin-bottom: 24rpx;
 }
 
 .card-steps {
-  background: #F8F9FA;
+  background: #FFF3E0;
   border-radius: 12rpx;
   padding: 20rpx 24rpx;
 }
@@ -192,7 +192,7 @@ page {
 .step-title {
   font-size: 26rpx;
   font-weight: 600;
-  color: #2C3E50;
+  color: #3E2723;
   margin-bottom: 16rpx;
 }
 
@@ -210,7 +210,7 @@ page {
 .step-num {
   width: 36rpx;
   height: 36rpx;
-  background: #4A90D9;
+  background: #E67E22;
   color: #FFFFFF;
   border-radius: 50%;
   font-size: 22rpx;
@@ -255,12 +255,12 @@ page {
 .comp-value {
   font-size: 28rpx;
   font-weight: 600;
-  color: #2C3E50;
+  color: #3E2723;
   font-family: monospace;
 }
 
 .comp-divider {
   width: 2rpx;
   height: 50rpx;
-  background: #ECF0F1;
+  background: #F5E6D3;
 }

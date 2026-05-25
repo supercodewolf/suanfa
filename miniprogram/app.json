@@ -5,9 +5,9 @@
   ],
   "window": {
     "navigationBarTitleText": "算法可视化学习",
-    "navigationBarBackgroundColor": "#2C3E50",
+    "navigationBarBackgroundColor": "#D35400",
     "navigationBarTextStyle": "white",
-    "backgroundColor": "#F5F7FA",
+    "backgroundColor": "#FFF8F0",
     "backgroundTextStyle": "light"
   },
   "sitemapLocation": "sitemap.json"

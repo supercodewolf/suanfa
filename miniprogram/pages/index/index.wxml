@@ -14,7 +14,7 @@
         <view style="display:flex;align-items:center;justify-content:space-between;padding:24rpx 30rpx;">
           <view style="display:flex;align-items:center;gap:16rpx;">
             <text style="font-size:36rpx;">{{item.icon}}</text>
-            <text style="font-size:30rpx;font-weight:600;color:#2C3E50;">{{item.name}}</text>
+            <text style="font-size:30rpx;font-weight:600;color:#3E2723;">{{item.name}}</text>
             <text class="weui-badge" style="background:{{item.color}};margin-left:8rpx;">{{item.algorithms.length}}</text>
           </view>
           <text class="arrow-icon {{item.expanded ? 'rotated' : ''}}" style="color:#BDC3C7;font-size:28rpx;">▾</text>

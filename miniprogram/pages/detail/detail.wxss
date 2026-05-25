@@ -141,10 +141,15 @@ page {
 }
 
 .btn-group .weui-btn {
-  margin: 0;
-  padding: 8rpx 18rpx;
+  margin: 0 !important;
+  padding: 12rpx 22rpx;
   font-size: 22rpx;
-  line-height: 1.6;
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-height: 60rpx;
+  vertical-align: middle;
 }
 
 .btn-group .weui-btn_primary {

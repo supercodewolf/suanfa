@@ -1,4 +1,4 @@
-@import './miniprogram_npm/weui-wxss/dist/style/weui.wxss';
+@import './styles/weui.wxss';
 
 /* 全局基础样式 */
 page {

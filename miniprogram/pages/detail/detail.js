@@ -43,6 +43,17 @@ Page({
     this.stopPlay();
   },
 
+  // ==================== 分享 ====================
+
+  onShareAppMessage() {
+    const { algorithm } = this.data;
+    return {
+      title: `${algorithm.name} - 算法可视化学习`,
+      path: `/pages/detail/detail?id=${this.algoId}`,
+      imageUrl: '' // 可替换为分享封面图
+    };
+  },
+
   // ==================== Canvas 初始化 ====================
 
   initCanvas() {

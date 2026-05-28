@@ -23,6 +23,14 @@ Page({
     this.setData({ categories: cats });
   },
 
+  // 分享
+  onShareAppMessage() {
+    return {
+      title: '🧠 算法可视化学习 - 28个算法动画演示',
+      path: '/pages/index/index'
+    };
+  },
+
   // 跳转详情页
   goDetail(e) {
     const { id } = e.currentTarget.dataset;

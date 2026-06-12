@@ -3,7 +3,7 @@
 > 微信小程序 | 28 个算法 | Canvas 动画 | 免费无广告
 
 <p align="center">
-  <img src="./screenshots/gh_qrcode.jpg" width="200" alt="小程序码">
+  <img src="./screenshots/gh_qrcode.jpg" width="200" alt="码狼算法小程序码">
 </p>
 <p align="center"><b>👆 微信扫码体验</b></p>
 <p align="center">或微信搜索「<b>码狼算法</b>」</p>
